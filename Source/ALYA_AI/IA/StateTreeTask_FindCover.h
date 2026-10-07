@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,20 +12,29 @@ USTRUCT()
 struct ALYA_AI_API FStateTreeTask_FindCoverInstanceData
 {
 	GENERATED_BODY()
-	
-	//Entrada: Query a ejecutar
-	UPROPERTY(EditAnywhere, Category = "EQS")
+
+	UPROPERTY(EditAnywhere, Category = "Context")
+	TObjectPtr<AAIController> AIController = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter")
 	TObjectPtr<UEnvQuery> CoverQuery = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "EQS")
+	UPROPERTY(EditAnywhere, Category = "Parameter")
 	TEnumAsByte<EEnvQueryRunMode::Type> RunMode = EEnvQueryRunMode::SingleResult;
 
-	//Salida: Ubicación encontrada (Output permite enlazar a variables del StateTree)
-	UPROPERTY(EditAnywhere, Category = "Output", meta = (Output))
+	UPROPERTY(EditAnywhere, Category = "Parameter")
+	bool bMoveToCover = true;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter", meta = (EditCondition = "bMoveToCover", ClampMin = "10.0", UIMin = "10.0"))
+	float AcceptanceRadius = 50.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Output")
 	FVector CoverLocation = FVector::ZeroVector;
 
-	//Estado interno
-	UPROPERTY()
+	int32 QueryRequestID = INDEX_NONE;
+
+	bool bIsMoving = false;
+
 	EStateTreeRunStatus ExecutionStatus = EStateTreeRunStatus::Running;
 };
 
