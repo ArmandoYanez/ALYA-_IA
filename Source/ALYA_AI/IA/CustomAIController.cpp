@@ -4,26 +4,29 @@
 
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISense_Sight.h"
 #include "GameFramework/Pawn.h"
 
 ACustomAIController::ACustomAIController()
 {
+	// Crea el componente que ejecuta el StateTree.
 	StateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>("StateTreeComponent");
 
+	// Crea el componente de percepcion y la configuracion de vista.
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerception");
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 
+	// Que tan lejos ve, a que distancia lo pierde y el angulo del cono de vision.
 	SightConfig->SightRadius = 1500.0f;
-	SightConfig->LoseSightRadius = 1800.0f;
+	SightConfig->LoseSightRadius = 2000.0f;
 	SightConfig->PeripheralVisionAngleDegrees = 60.0f;
-	SightConfig->SetMaxAge(5.0f);
+
+	// Detecta a cualquier actor, sin importar su equipo.
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
 
+	// Registra el sentido de vista y usa este componente como la percepcion del controller.
 	AIPerception->ConfigureSense(*SightConfig);
-	AIPerception->SetDominantSense(UAISense_Sight::StaticClass());
 	SetPerceptionComponent(*AIPerception);
 }
 
@@ -31,42 +34,35 @@ void ACustomAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Escucha el evento de percepcion: se dispara cuando el jugador entra o sale de la vista.
 	AIPerception->OnTargetPerceptionUpdated.AddDynamic(this, &ACustomAIController::HandleTargetPerceptionUpdated);
 }
 
 void ACustomAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	// Solo nos interesa el jugador; cualquier otro actor se ignora.
 	const APawn* PerceivedPawn = Cast<APawn>(Actor);
 	if (!PerceivedPawn || !PerceivedPawn->IsPlayerControlled())
 	{
 		return;
 	}
 
-	if (Stimulus.Type != UAISense::GetSenseID<UAISense_Sight>())
-	{
-		return;
-	}
-
-	PerceivedPlayer = Actor;
-	LastKnownPlayerLocation = Stimulus.StimulusLocation;
-
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		// Lo ve: cancela cualquier "perdida" pendiente, guarda el objetivo y marca que lo tiene.
 		GetWorldTimerManager().ClearTimer(LoseSightTimer);
-		if (!bCanSeePlayer)
-		{
-			bCanSeePlayer = true;
-			UE_LOG(LogTemp, Display, TEXT("Perception: VE al jugador en %s"), *LastKnownPlayerLocation.ToString());
-		}
+		TargetActor = Actor;
+		bHasTarget = true;
 	}
-	else if (bCanSeePlayer && !GetWorldTimerManager().IsTimerActive(LoseSightTimer))
+	else if (bHasTarget && !GetWorldTimerManager().IsTimerActive(LoseSightTimer))
 	{
+		// Lo dejo de ver: espera LoseSightGraceTime antes de darlo por perdido,
 		GetWorldTimerManager().SetTimer(LoseSightTimer, this, &ACustomAIController::ClearPlayerSight, LoseSightGraceTime, false);
 	}
 }
 
 void ACustomAIController::ClearPlayerSight()
 {
-	bCanSeePlayer = false;
-	UE_LOG(LogTemp, Display, TEXT("Perception: PERDIO al jugador en %s"), *LastKnownPlayerLocation.ToString());
+	// Paso el tiempo de gracia sin volver a verlo: ahora si se pierde.
+	bHasTarget = false;
 }
