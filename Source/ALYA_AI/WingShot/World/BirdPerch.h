@@ -1,4 +1,4 @@
-// Puntos del nivel que usan los EQS: ramas, ruta del aguila, rutas de raton y comida.
+// puntos del nivel que usan los EQS, ramas, ruta del aguila, rutas de raton y comida
 
 #pragma once
 
@@ -8,7 +8,7 @@
 
 class UBillboardComponent;
 
-// Punto en una rama donde un ave puede posarse. Solo un ave a la vez.
+// Punto en una rama donde un ave puede posarse. Solo un ave a la vez
 UCLASS()
 class ALYA_AI_API ABirdPerch : public AActor
 {
@@ -17,19 +17,19 @@ class ALYA_AI_API ABirdPerch : public AActor
 public:
 	ABirdPerch();
 
-	// Percha alta/escondida preferida por el buho.
+	// Percha alta/escondida preferida por el buho
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Perch")
 	bool bOwlPerch = false;
 
 	UFUNCTION(BlueprintPure, Category = "Perch")
 	bool IsAvailableFor(const AActor* Bird) const { return !Occupant.IsValid() || Occupant.Get() == Bird; }
 
-	// Ocupar / liberar la rama.
+	// Ocupar / liberar la rama
 	void SetOccupant(AActor* Bird) { Occupant = Bird; }
 	void Release(const AActor* Bird) { if (Occupant.Get() == Bird) { Occupant.Reset(); } }
 
 protected:
-	// Ave que esta (o va) en la rama.
+	// Ave que esta (o va) en la rama
 	TWeakObjectPtr<AActor> Occupant;
 
 #if WITH_EDITORONLY_DATA
@@ -38,7 +38,7 @@ protected:
 #endif
 };
 
-// Punto de la ruta de vuelo del aguila sobre los arboles.
+// Punto de la ruta de vuelo del aguila sobre los arboles
 UCLASS()
 class ALYA_AI_API AEagleWaypoint : public AActor
 {
@@ -54,7 +54,7 @@ protected:
 #endif
 };
 
-// Extremo (A o B) de la ruta que recorre un raton. Los dos puntos de una ruta comparten RouteId.
+// extremo (A o B) de la ruta que recorre un raton. Los dos puntos de una ruta comparten RouteId
 UCLASS()
 class ALYA_AI_API AMousePathPoint : public AActor
 {
@@ -73,7 +73,7 @@ protected:
 #endif
 };
 
-// Zona del suelo donde las aves bajan a comer.
+// zona del suelo donde las aves bajan a comer
 UCLASS()
 class ALYA_AI_API ABirdFeedSpot : public AActor
 {
@@ -82,7 +82,7 @@ class ALYA_AI_API ABirdFeedSpot : public AActor
 public:
 	ABirdFeedSpot();
 
-	// Radio dentro del cual el ave elige un punto al azar para picotear.
+	// Radio dentro del cual el ave elige un punto al azar para picotear
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Feed")
 	float Radius = 120.f;
 

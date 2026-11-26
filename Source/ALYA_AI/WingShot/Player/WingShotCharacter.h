@@ -1,4 +1,4 @@
-// Personaje del jugador en primera persona.
+// Personaje del jugador en primera persona
 
 #pragma once
 
@@ -8,7 +8,7 @@
 
 class UInputAction;
 
-// Jugador de WingShot: sigilo, binoculares, pistola de red y coleccion de aves.
+// Jugador de WingShot, sigilo, binoculares, pistola de red y coleccion de aves
 UCLASS()
 class ALYA_AI_API AWingShotCharacter : public AALYA_AICharacter
 {
@@ -19,11 +19,11 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	// Dispara la red (tambien se puede llamar desde Blueprint o pruebas).
+	// dispara la red (tambien se puede llamar desde Blueprint o pruebas)
 	UFUNCTION(BlueprintCallable, Category = "WingShot|Net")
 	void FireNet();
 
-	// La red llama esto al atrapar a una criatura.
+	// La red llama esto al atrapar a una criatura
 	UFUNCTION(BlueprintCallable, Category = "WingShot|Collection")
 	void RegisterCatch(FName Species);
 
@@ -39,7 +39,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "WingShot|Health")
 	float GetHealthPercent() const { return MaxHealth > 0.f ? Health / MaxHealth : 0.f; }
 
-	// Los ataques de buho y aguila llegan como dano (ApplyDamage).
+	// los ataques de buho y aguila llegan como dano (ApplyDamage)
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	const TMap<FName, int32>& GetCaughtBySpecies() const { return CaughtBySpecies; }
@@ -54,7 +54,7 @@ protected:
 	void StartBinoculars();
 	void StopBinoculars();
 
-	// Emite un ruido de pasos que AI Perception (Hearing) puede escuchar.
+	// Emite un ruido de pasos que AI Perception (Hearing) puede escuchar
 	void UpdateFootstepNoise(float DeltaSeconds);
 
 	// --- Input ---
@@ -74,11 +74,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "WingShot|Movement")
 	float SneakSpeed = 200.0f;
 
-	// Cada cuantos segundos se emite un paso mientras se camina.
+	// Cada cuantos segundos se emite un paso mientras se camina
 	UPROPERTY(EditAnywhere, Category = "WingShot|Noise")
 	float FootstepInterval = 0.45f;
 
-	// Distancia a la que las aves escuchan los pasos normales / sigilosos.
+	// distancia a la que las aves escuchan los pasos normales / sigilosos
 	UPROPERTY(EditAnywhere, Category = "WingShot|Noise")
 	float WalkNoiseRange = 1500.0f;
 
@@ -92,12 +92,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "WingShot|Binoculars")
 	float ZoomInterpSpeed = 10.0f;
 
-	// Multiplicador de sensibilidad de la camara mientras se usan los binoculares.
+	// multiplicador de sensibilidad de la camara mientras se usan los binoculares
 	UPROPERTY(EditAnywhere, Category = "WingShot|Binoculars")
 	float BinocularsLookScale = 0.25f;
 
 	// --- Pistola de red ---
-	// Blueprint de la red que se dispara (BP_Net). Se asigna en BP_FirstPersonCharacter.
+	// Blueprint de la red que se dispara (BP_Net). Se asigna en BP_FirstPersonCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WingShot|Net")
 	TSubclassOf<AActor> NetClass;
 

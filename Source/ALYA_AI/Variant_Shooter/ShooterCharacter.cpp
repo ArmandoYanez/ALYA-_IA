@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "ShooterCharacter.h"
 #include "ShooterWeapon.h"
 #include "EnhancedInputComponent.h"
@@ -67,7 +66,7 @@ float AShooterCharacter::TakeDamage(float Damage, struct FDamageEvent const& Dam
 		return 0.0f;
 	}
 
-	// Reduce HP
+	// reduce HP
 	CurrentHP -= Damage;
 
 	// Have we depleted HP?

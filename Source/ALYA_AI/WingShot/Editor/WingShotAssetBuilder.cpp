@@ -1,5 +1,5 @@
-// Herramienta del editor que crea los assets de IA (DataTables de Markov, EQS y StateTrees).
-// No se usa al jugar: solo sirve para generar/regenerar los assets.
+// herramienta del editor que crea los assets de IA (DataTables de Markov, EQS y StateTrees)
+// no se usa al jugar, solo sirve para generar/regenerar los assets
 
 #include "WingShot/Editor/WingShotAssetBuilder.h"
 
@@ -36,7 +36,7 @@
 
 namespace WingShotBuilder
 {
-	// Crea el asset o reutiliza el existente (para poder regenerar).
+	// Crea el asset o reutiliza el existente (para poder regenerar)
 	template <typename T>
 	T* CreateOrLoadAsset(const FString& PackagePath, const FString& Name, TArray<UPackage*>& OutPackages)
 	{
@@ -117,7 +117,7 @@ namespace WingShotBuilder
 
 	void AddHiddenFromPlayer(UEnvQueryOption* Option)
 	{
-		// Bool Match = true ("require hit"): prefiere puntos donde la geometria tapa la vista del jugador.
+		// bool Match = true ("require hit"), prefiere puntos donde la geometria tapa la vista del jugador
 		UEnvQueryTest_Trace* Test = NewObject<UEnvQueryTest_Trace>(Option);
 		Test->Context = UEnvQueryContext_WingShotPlayer::StaticClass();
 		Test->TestPurpose = EEnvTestPurpose::Score;
@@ -129,9 +129,9 @@ namespace WingShotBuilder
 
 	void AddAheadOfQuerier(UEnvQueryOption* Option)
 	{
-		// Dot entre la orientacion del ave y la direccion hacia el punto: prefiere lo que tiene enfrente.
+		// dot entre la orientacion del ave y la direccion hacia el punto, prefiere lo que tiene enfrente
 		UEnvQueryTest_Dot* Test = NewObject<UEnvQueryTest_Dot>(Option);
-		// LineA, LineB y TestMode son protected: se asignan por reflexion (como lo hace el panel de detalles).
+		// LineA, LineB y TestMode son protected, se asignan por reflexion (como lo hace el panel de detalles)
 		FEnvDirection LineA;
 		LineA.DirMode = EEnvDirection::Rotation;
 		LineA.Rotation = UEnvQueryContext_Querier::StaticClass();
@@ -205,7 +205,7 @@ namespace WingShotBuilder
 		return Node.ID;
 	}
 
-	// El vuelo del hijo toma su destino del EQS del padre (Property Binding).
+	// El vuelo del hijo toma su destino del EQS del padre (Property Binding)
 	void BindFlightToSearch(UStateTreeEditorData* EditorData, const FGuid& FindId, const FGuid& FlyId)
 	{
 		Bind(EditorData, FindId, TEXT("Location"), FlyId, TEXT("Destination"));
@@ -213,7 +213,7 @@ namespace WingShotBuilder
 		Bind(EditorData, FindId, TEXT("bFound"), FlyId, TEXT("bReady"));
 	}
 
-	// Estado padre con EQS + estado hijo que vuela al resultado.
+	// Estado padre con EQS + estado hijo que vuela al resultado
 	UStateTreeState& AddSearchAndFly(UStateTreeEditorData* EditorData, UStateTreeState& Parent, FName ChildName, UEnvQuery* Query,
 		float Speed, float ArcHeight, bool bTrackTarget = false)
 	{
@@ -253,7 +253,7 @@ namespace WingShotBuilder
 			bCompiled ? TEXT("compilado OK") : TEXT("CON ERRORES (ver Output Log)"));
 	}
 
-	// Reaccion a dano/stun (ciclo base compartido): evento de impacto -> aturdido -> regresa a ReturnTo.
+	// reaccion a dano/stun (ciclo base compartido), evento de impacto -> aturdido -> regresa a ReturnTo
 	void AddStunReaction(UStateTreeEditorData* EditorData, UStateTreeState& Root, const UStateTreeState& ReturnTo)
 	{
 		UStateTreeState& Stunned = Root.AddChildState(TEXT("Stunned"));
@@ -274,7 +274,7 @@ namespace WingShotBuilder
 
 	UEnvQuery* GetEscapeQuery(TArray<UPackage*>& Packages)
 	{
-		// Escape: rama libre, muy lejos de la amenaza y escondida del jugador (compartido por aves).
+		// Escape, rama libre, muy lejos de la amenaza y escondida del jugador (compartido por aves)
 		UEnvQuery* Query = CreateOrLoadAsset<UEnvQuery>(TEXT("/Game/WingShot/AI/CommonBird"), TEXT("EQS_Bird_FindEscapePerch"), Packages);
 		UEnvQueryOption* Option = ResetQuery(Query, ABirdPerch::StaticClass(), 5000.f);
 		AddBoolTest<UEnvQueryTest_PerchAvailable>(Option, EEnvTestPurpose::Filter);
@@ -290,7 +290,7 @@ FString UWingShotAssetBuilder::BuildAllAssets()
 	return BuildMouseAssets() + TEXT("\n") + BuildCommonBirdAssets() + TEXT("\n") + BuildOwlAssets() + TEXT("\n") + BuildEagleAssets();
 }
 
-// Ave comun: tabla Markov, 3 EQS y ST_CommonBird.
+// Ave comun, tabla Markov, 3 EQS y ST_CommonBird
 FString UWingShotAssetBuilder::BuildCommonBirdAssets()
 {
 #if WITH_EDITOR
@@ -310,7 +310,7 @@ FString UWingShotAssetBuilder::BuildCommonBirdAssets()
 	// ---------- EQS ----------
 	UEnvQuery* FindPerch = CreateOrLoadAsset<UEnvQuery>(Dir, TEXT("EQS_Bird_FindPerch"), Packages);
 	{
-		// Rama nueva: libre, en otro arbol (>= 400) y lejos del jugador.
+		// Rama nueva, libre, en otro arbol (>= 400) y lejos del jugador
 		UEnvQueryOption* Option = ResetQuery(FindPerch, ABirdPerch::StaticClass(), 2500.f);
 		AddBoolTest<UEnvQueryTest_PerchAvailable>(Option, EEnvTestPurpose::Filter);
 		AddDistance(Option, UEnvQueryContext_Querier::StaticClass(), EEnvTestPurpose::FilterAndScore, 400.f, -1.f);
@@ -319,7 +319,7 @@ FString UWingShotAssetBuilder::BuildCommonBirdAssets()
 	UEnvQuery* FindEscape = GetEscapeQuery(Packages);
 	UEnvQuery* FindFeed = CreateOrLoadAsset<UEnvQuery>(Dir, TEXT("EQS_Bird_FindFeedSpot"), Packages);
 	{
-		// Comida: zona en el suelo lejos del jugador y cerca del ave.
+		// Comida, zona en el suelo lejos del jugador y cerca del ave
 		UEnvQueryOption* Option = ResetQuery(FindFeed, ABirdFeedSpot::StaticClass(), 3500.f);
 		AddDistance(Option, UEnvQueryContext_WingShotPlayer::StaticClass(), EEnvTestPurpose::Filter, 900.f, 1.f);
 		AddDistance(Option, UEnvQueryContext_Querier::StaticClass(), EEnvTestPurpose::Score, 0.f, -1.f);
@@ -359,7 +359,7 @@ FString UWingShotAssetBuilder::BuildCommonBirdAssets()
 	AddIdle(Eat, 4.f, 8.f);
 	GoTo(Eat, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
 
-	// Susto (evento de percepcion) -> rama de escape.
+	// Susto (evento de percepcion) -> rama de escape
 	Calm.AddTransition(EStateTreeTransitionTrigger::OnEvent, ABirdAIController::GetScaredEventTag(),
 		EStateTreeTransitionType::GotoState, &Scared).Priority = EStateTreeTransitionPriority::High;
 	UStateTreeState& Escape = AddSearchAndFly(EditorData, Scared, TEXT("Escape"), FindEscape, 1300.f, 350.f);
@@ -374,7 +374,7 @@ FString UWingShotAssetBuilder::BuildCommonBirdAssets()
 #endif
 }
 
-// Buho: tabla Markov, EQS de perchas y presas, ST_Owl.
+// buho, tabla Markov, EQS de perchas y presas, ST_Owl
 FString UWingShotAssetBuilder::BuildOwlAssets()
 {
 #if WITH_EDITOR
@@ -384,7 +384,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 	const FString Dir = TEXT("/Game/WingShot/AI/Owl");
 
 	// ---------- Markov ----------
-	// "Disturbed" es la decision al despertarlo: atacar o huir.
+	// "Disturbed" es la decision al despertarlo, atacar o huir
 	UDataTable* Markov = MakeMarkovTable(Dir, TEXT("DT_Markov_Owl"), {
 		{ TEXT("Sleep"),     Row({ { A::Sleep, 0.45f }, { A::Perch, 0.30f }, { A::Relocate, 0.10f }, { A::Hunt, 0.15f } }) },
 		{ TEXT("Perch"),     Row({ { A::Sleep, 0.30f }, { A::Perch, 0.20f }, { A::Relocate, 0.25f }, { A::Hunt, 0.25f } }) },
@@ -397,7 +397,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 	// ---------- EQS ----------
 	UEnvQuery* FindPerch = CreateOrLoadAsset<UEnvQuery>(Dir, TEXT("EQS_Owl_FindPerch"), Packages);
 	{
-		// Rama alta de buho, libre y lejos del jugador.
+		// rama alta de buho, libre y lejos del jugador
 		UEnvQueryOption* Option = ResetQuery(FindPerch, ABirdPerch::StaticClass(), 4000.f);
 		AddBoolTest<UEnvQueryTest_PerchAvailable>(Option, EEnvTestPurpose::Filter);
 		AddBoolTest<UEnvQueryTest_OwlPerch>(Option, EEnvTestPurpose::Score);
@@ -406,7 +406,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 	}
 	UEnvQuery* FindPrey = CreateOrLoadAsset<UEnvQuery>(Dir, TEXT("EQS_Owl_FindPrey"), Packages);
 	{
-		// Raton vivo mas cercano.
+		// Raton vivo mas cercano
 		UEnvQueryOption* Option = ResetQuery(FindPrey, AMouseCritter::StaticClass(), 5000.f);
 		AddBoolTest<UEnvQueryTest_PreyAlive>(Option, EEnvTestPurpose::Filter);
 		AddDistance(Option, UEnvQueryContext_Querier::StaticClass(), EEnvTestPurpose::Score, 0.f, -1.f);
@@ -448,7 +448,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 	GoTo(Relocate, EStateTreeTransitionTrigger::OnStateFailed, Decide);
 	GoTo(FlyToBranch, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
 
-	// Caza: busca el raton, baja en picada siguiendolo y se lo come en el suelo.
+	// caza, busca el raton, baja en picada siguiendolo y se lo come en el suelo
 	Hunt.AddEnterCondition<FStateTreeCondition_PreyAvailable>();
 	UStateTreeState& Swoop = AddSearchAndFly(EditorData, Hunt, TEXT("Swoop"), FindPrey, 900.f, 150.f, true);
 	UStateTreeState& EatPrey = Hunt.AddChildState(TEXT("EatPrey"));
@@ -458,7 +458,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 	AddIdle(EatPrey, 4.f, 7.f);
 	GoTo(EatPrey, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
 
-	// Despertado: Markov (fila "Disturbed") decide atacar o huir.
+	// despertado, Markov (fila "Disturbed") decide atacar o huir
 	Calm.AddTransition(EStateTreeTransitionTrigger::OnEvent, ABirdAIController::GetScaredEventTag(),
 		EStateTreeTransitionType::GotoState, &Disturbed).Priority = EStateTreeTransitionPriority::High;
 	UStateTreeState& FightOrFlight = Disturbed.AddChildState(TEXT("FightOrFlight"));
@@ -489,7 +489,7 @@ FString UWingShotAssetBuilder::BuildOwlAssets()
 #endif
 }
 
-// Aguila: tabla Markov, EQS de ruta y presas, ST_Eagle.
+// Aguila, tabla Markov, EQS de ruta y presas, ST_Eagle
 FString UWingShotAssetBuilder::BuildEagleAssets()
 {
 #if WITH_EDITOR
@@ -509,7 +509,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 	// ---------- EQS ----------
 	UEnvQuery* NextWaypoint = CreateOrLoadAsset<UEnvQuery>(Dir, TEXT("EQS_Eagle_NextWaypoint"), Packages);
 	{
-		// Siguiente punto de vuelo: no el mismo, cercano y de preferencia enfrente (vuela en circulos).
+		// Siguiente punto de vuelo, no el mismo, cercano y de preferencia enfrente (vuela en circulos)
 		UEnvQueryOption* Option = ResetQuery(NextWaypoint, AEagleWaypoint::StaticClass(), 8000.f);
 		AddDistance(Option, UEnvQueryContext_Querier::StaticClass(), EEnvTestPurpose::FilterAndScore, 1200.f, -1.f);
 		AddAheadOfQuerier(Option);
@@ -541,7 +541,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 	AddActivityTransition(EditorData, Decide, DecideId, A::Hunt, Hunt);
 	AddActivityTransition(EditorData, Decide, DecideId, A::Attack, Attack);
 
-	// Patrullar: vuelo rapido entre puntos. Buscar: vuelo lento observando.
+	// Patrullar, vuelo rapido entre puntos. Buscar, vuelo lento observando
 	UStateTreeState& Glide = AddSearchAndFly(EditorData, Patrol, TEXT("Glide"), NextWaypoint, 900.f, 150.f);
 	GoTo(Patrol, EStateTreeTransitionTrigger::OnStateFailed, Decide);
 	GoTo(Glide, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
@@ -550,7 +550,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 	GoTo(Search, EStateTreeTransitionTrigger::OnStateFailed, Decide);
 	GoTo(Scan, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
 
-	// Si ve al jugador mientras busca o caza, puede cambiar su curso para atacarlo.
+	// Si ve al jugador mientras busca o caza, puede cambiar su curso para atacarlo
 	for (UStateTreeState* State : { &Search, &Hunt })
 	{
 		FStateTreeTransition& Spotted = State->AddTransition(EStateTreeTransitionTrigger::OnEvent,
@@ -559,7 +559,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 		Spotted.AddCondition<FStateTreeCondition_RandomChance>().GetInstanceData().Probability = 0.5f;
 	}
 
-	// Cazar: picada siguiendo al raton y comer en el suelo.
+	// Cazar, picada siguiendo al raton y comer en el suelo
 	Hunt.AddEnterCondition<FStateTreeCondition_PreyAvailable>();
 	UStateTreeState& Dive = AddSearchAndFly(EditorData, Hunt, TEXT("Dive"), FindPrey, 1400.f, 0.f, true);
 	UStateTreeState& EatPrey = Hunt.AddChildState(TEXT("EatPrey"));
@@ -577,7 +577,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 	}
 	GoTo(Attack, EStateTreeTransitionTrigger::OnStateCompleted, Ascend);
 
-	// Volver a subir al cielo.
+	// Volver a subir al cielo
 	UStateTreeState& Climb = AddSearchAndFly(EditorData, Ascend, TEXT("Climb"), NextWaypoint, 900.f, 300.f);
 	GoTo(Ascend, EStateTreeTransitionTrigger::OnStateFailed, Decide);
 	GoTo(Climb, EStateTreeTransitionTrigger::OnStateCompleted, Decide);
@@ -590,7 +590,7 @@ FString UWingShotAssetBuilder::BuildEagleAssets()
 #endif
 }
 
-// Raton: ST_Mouse (caminar, descansar, huir, stun).
+// raton, ST_Mouse (caminar, descansar, huir, stun)
 FString UWingShotAssetBuilder::BuildMouseAssets()
 {
 #if WITH_EDITOR
@@ -602,7 +602,7 @@ FString UWingShotAssetBuilder::BuildMouseAssets()
 	UStateTreeEditorData* EditorData = ResetStateTree(StateTree);
 
 	// Caminar al otro extremo de la ruta -> descansar -> repetir. Si percibe al jugador o a un
-	// depredador, huye. Morir lo detiene el depredador.
+	// depredador, huye. Morir lo detiene el depredador
 	AddCommonEvaluators(EditorData, false);
 	UStateTreeState& Root = EditorData->AddRootState();
 	UStateTreeState& Walk = Root.AddChildState(TEXT("Walk"));

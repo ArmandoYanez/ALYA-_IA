@@ -1,4 +1,4 @@
-// Nodos de StateTree exclusivos del raton: caminar su ruta y huir.
+// Nodos de StateTree exclusivos del raton, caminar su ruta y huir
 
 #pragma once
 
@@ -8,9 +8,7 @@
 
 class AAIController;
 
-// =====================================================================
-// Raton: camina al otro extremo de su ruta (A <-> B) por el NavMesh.
-// =====================================================================
+// Raton, camina al otro extremo de su ruta (A <-> B) por el NavMesh
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_MouseWalkRouteInstanceData
 {
@@ -20,7 +18,7 @@ struct ALYA_AI_API FStateTreeTask_MouseWalkRouteInstanceData
 	TObjectPtr<AAIController> AIController = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// Punto de la ruta al que va.
+	// Punto de la ruta al que va
 	FVector Destination = FVector::ZeroVector;
 };
 
@@ -37,9 +35,7 @@ struct ALYA_AI_API FStateTreeTask_MouseWalkRoute : public FStateTreeTaskCommonBa
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };
 
-// =====================================================================
-// Raton: huye corriendo en direccion contraria a la amenaza percibida.
-// =====================================================================
+// Raton, huye corriendo en direccion contraria a la amenaza percibida
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_MouseFleeInstanceData
 {
@@ -49,14 +45,14 @@ struct ALYA_AI_API FStateTreeTask_MouseFleeInstanceData
 	TObjectPtr<AAIController> AIController = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Que tan lejos corre.
+	// Que tan lejos corre
 	float FleeDistance = 900.f;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Velocidad al huir.
+	// Velocidad al huir
 	float FleeSpeed = 480.f;
 
-	// Velocidad normal (para regresarla al terminar).
+	// Velocidad normal (para regresarla al terminar)
 	float PreviousSpeed = 0.f;
 };
 

@@ -9,8 +9,7 @@
 class AShooterWeapon;
 class UAnimMontage;
 
-
-// This class does not need to be modified.
+// This class does not need to be modified
 UINTERFACE(MinimalAPI)
 class UShooterWeaponHolder : public UInterface
 {

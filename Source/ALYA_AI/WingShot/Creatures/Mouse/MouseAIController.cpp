@@ -13,11 +13,11 @@
 
 AMouseAIController::AMouseAIController()
 {
-	// El StateTree se arranca en OnPossess.
+	// el StateTree se arranca en OnPossess
 	StateTreeComponent = CreateDefaultSubobject<UStateTreeAIComponent>(TEXT("StateTree"));
 	StateTreeComponent->SetStartLogicAutomatically(false);
 
-	// Vista y oido a ras de suelo: detecta al jugador y a los depredadores cercanos.
+	// Vista y oido a ras de suelo, detecta al jugador y a los depredadores cercanos
 	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	SightConfig->SightRadius = 900.f;
@@ -39,7 +39,7 @@ AMouseAIController::AMouseAIController()
 
 void AMouseAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-	// Amenazas: el jugador y los depredadores (buho y aguila).
+	// Amenazas, el jugador y los depredadores (buho y aguila)
 	const APawn* PerceivedPawn = Cast<APawn>(Actor);
 	const bool bThreat = PerceivedPawn && (PerceivedPawn->IsPlayerControlled() || Actor->IsA<AOwlBird>() || Actor->IsA<AEagleBird>());
 	if (!bThreat || !Stimulus.WasSuccessfullySensed())
@@ -47,7 +47,7 @@ void AMouseAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulu
 		return;
 	}
 
-	// Aturdido no reacciona: el stun no se interrumpe con un susto.
+	// aturdido no reacciona, el stun no se interrumpe con un susto
 	if (const AMouseCritter* Mouse = Cast<AMouseCritter>(GetPawn()); Mouse && Mouse->IsStunned())
 	{
 		return;
@@ -58,7 +58,7 @@ void AMouseAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulu
 	if (Now - LastScareTime > ScareCooldown)
 	{
 		LastScareTime = Now;
-		// Evento -> el StateTree pasa a Flee.
+		// evento -> el StateTree pasa a Flee
 		StateTreeComponent->SendStateTreeEvent(WingShot::ScaredTag());
 	}
 }
@@ -66,7 +66,7 @@ void AMouseAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulu
 void AMouseAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	// Escucha la percepcion y arranca ST_Mouse.
+	// Escucha la percepcion y arranca ST_Mouse
 	AIPerception->OnTargetPerceptionUpdated.AddUniqueDynamic(this, &AMouseAIController::HandleTargetPerceptionUpdated);
 	if (const AMouseCritter* Mouse = Cast<AMouseCritter>(InPawn))
 	{

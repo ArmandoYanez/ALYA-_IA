@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Variant_Horror/HorrorPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -71,7 +70,7 @@ void AHorrorPlayerController::SetupInputComponent()
 	// only add IMCs for local player controllers
 	if (IsLocalPlayerController())
 	{
-		// Add Input Mapping Contexts
+		// add Input Mapping Contexts
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 		{
 			for (UInputMappingContext* CurrentContext : DefaultMappingContexts)

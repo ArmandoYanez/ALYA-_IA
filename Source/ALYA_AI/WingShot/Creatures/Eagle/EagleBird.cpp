@@ -1,4 +1,4 @@
-// Datos del aguila: su StateTree.
+// datos del aguila, su StateTree
 
 #include "WingShot/Creatures/Eagle/EagleBird.h"
 
@@ -8,9 +8,9 @@
 AEagleBird::AEagleBird()
 {
 	SpeciesName = TEXT("Aguila");
-	// Usa su propio controller (ve mas lejos).
+	// Usa su propio controller (ve mas lejos)
 	AIControllerClass = AEagleAIController::StaticClass();
-	// Su cerebro: ST_Eagle.
+	// Su cerebro, ST_Eagle
 	BehaviorTreeAsset = TSoftObjectPtr<UStateTree>(FSoftObjectPath(TEXT("/Game/WingShot/AI/Eagle/ST_Eagle.ST_Eagle")));
 	SitHeight = 40.f;
 }

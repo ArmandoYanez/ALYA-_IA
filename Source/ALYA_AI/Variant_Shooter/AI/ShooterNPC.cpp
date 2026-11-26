@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Variant_Shooter/AI/ShooterNPC.h"
 #include "ShooterWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -41,7 +40,7 @@ float AShooterNPC::TakeDamage(float Damage, struct FDamageEvent const& DamageEve
 		return 0.0f;
 	}
 
-	// Reduce HP
+	// reduce HP
 	CurrentHP -= Damage;
 
 	// Have we depleted HP?

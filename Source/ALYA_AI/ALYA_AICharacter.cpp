@@ -23,7 +23,7 @@ AALYA_AICharacter::AALYA_AICharacter()
 	FirstPersonMesh->FirstPersonPrimitiveType = EFirstPersonPrimitiveType::FirstPerson;
 	FirstPersonMesh->SetCollisionProfileName(FName("NoCollision"));
 
-	// Create the Camera Component	
+	// Create the Camera Component
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
 	FirstPersonCameraComponent->SetupAttachment(FirstPersonMesh, FName("head"));
 	FirstPersonCameraComponent->SetRelativeLocationAndRotation(FVector(-2.8f, 5.89f, 0.0f), FRotator(0.0f, 90.0f, -90.0f));
@@ -56,7 +56,7 @@ void AALYA_AICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AALYA_AICharacter::MoveInput);
 
-		// Looking/Aiming
+		// looking/Aiming
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AALYA_AICharacter::LookInput);
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AALYA_AICharacter::LookInput);
 	}
@@ -65,7 +65,6 @@ void AALYA_AICharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		UE_LOG(LogALYA_AI, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
-
 
 void AALYA_AICharacter::MoveInput(const FInputActionValue& Value)
 {

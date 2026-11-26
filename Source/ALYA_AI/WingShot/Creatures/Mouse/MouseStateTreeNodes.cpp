@@ -1,4 +1,4 @@
-// Tareas del raton. Se mueve por el NavMesh con MoveToLocation del AIController.
+// Tareas del raton. Se mueve por el NavMesh con MoveToLocation del AIController
 
 #include "WingShot/Creatures/Mouse/MouseStateTreeNodes.h"
 
@@ -12,9 +12,7 @@
 #include "WingShot/Creatures/Mouse/MouseAIController.h"
 #include "WingShot/Creatures/Mouse/MouseCritter.h"
 
-// ---------------------------------------------------------------------
 // Mouse Walk Route
-// ---------------------------------------------------------------------
 EStateTreeRunStatus FStateTreeTask_MouseWalkRoute::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -24,7 +22,7 @@ EStateTreeRunStatus FStateTreeTask_MouseWalkRoute::EnterState(FStateTreeExecutio
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// El destino es el extremo de su ruta mas lejano (ida y vuelta entre A y B).
+	// El destino es el extremo de su ruta mas lejano (ida y vuelta entre A y B)
 	const AMousePathPoint* Best = nullptr;
 	float BestDistance = -1.f;
 	for (TActorIterator<AMousePathPoint> It(Mouse->GetWorld()); It; ++It)
@@ -46,7 +44,7 @@ EStateTreeRunStatus FStateTreeTask_MouseWalkRoute::EnterState(FStateTreeExecutio
 	}
 
 	Data.Destination = Best->GetActorLocation();
-	// Camina hacia el punto usando el NavMesh.
+	// Camina hacia el punto usando el NavMesh
 	const EPathFollowingRequestResult::Type Result = Data.AIController->MoveToLocation(Data.Destination, 40.f);
 	return Result == EPathFollowingRequestResult::Failed ? EStateTreeRunStatus::Failed : EStateTreeRunStatus::Running;
 }
@@ -58,7 +56,7 @@ EStateTreeRunStatus FStateTreeTask_MouseWalkRoute::Tick(FStateTreeExecutionConte
 	{
 		return EStateTreeRunStatus::Failed;
 	}
-	// Termina cuando deja de moverse (ya llego).
+	// Termina cuando deja de moverse (ya llego)
 	return Data.AIController->GetMoveStatus() == EPathFollowingStatus::Moving ? EStateTreeRunStatus::Running : EStateTreeRunStatus::Succeeded;
 }
 
@@ -66,14 +64,12 @@ void FStateTreeTask_MouseWalkRoute::ExitState(FStateTreeExecutionContext& Contex
 {
 	if (AAIController* Controller = Context.GetInstanceData(*this).AIController)
 	{
-		// Si se interrumpe, se detiene.
+		// Si se interrumpe, se detiene
 		Controller->StopMovement();
 	}
 }
 
-// ---------------------------------------------------------------------
-// Mouse Flee
-// ---------------------------------------------------------------------
+// mouse Flee
 EStateTreeRunStatus FStateTreeTask_MouseFlee::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -84,7 +80,7 @@ EStateTreeRunStatus FStateTreeTask_MouseFlee::EnterState(FStateTreeExecutionCont
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// Corre en direccion contraria a la amenaza y proyecta el punto al NavMesh.
+	// corre en direccion contraria a la amenaza y proyecta el punto al NavMesh
 	FVector Away = (Mouse->GetActorLocation() - Controller->GetThreatLocation()).GetSafeNormal2D();
 	if (Away.IsNearlyZero())
 	{
@@ -94,7 +90,7 @@ EStateTreeRunStatus FStateTreeTask_MouseFlee::EnterState(FStateTreeExecutionCont
 	if (const UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Mouse->GetWorld()))
 	{
 		FNavLocation Projected;
-		// Ajusta el punto para que quede sobre el NavMesh.
+		// ajusta el punto para que quede sobre el NavMesh
 		if (NavSys->ProjectPointToNavigation(Target, Projected, FVector(400.f, 400.f, 300.f)))
 		{
 			Target = Projected.Location;
@@ -102,7 +98,7 @@ EStateTreeRunStatus FStateTreeTask_MouseFlee::EnterState(FStateTreeExecutionCont
 	}
 
 	Data.PreviousSpeed = Mouse->GetCharacterMovement()->MaxWalkSpeed;
-	// Corre mas rapido al huir.
+	// Corre mas rapido al huir
 	Mouse->GetCharacterMovement()->MaxWalkSpeed = Data.FleeSpeed;
 	const EPathFollowingRequestResult::Type Result = Data.AIController->MoveToLocation(Target, 40.f);
 	return Result == EPathFollowingRequestResult::Failed ? EStateTreeRunStatus::Failed : EStateTreeRunStatus::Running;
@@ -123,7 +119,7 @@ void FStateTreeTask_MouseFlee::ExitState(FStateTreeExecutionContext& Context, co
 	const FInstanceDataType& Data = Context.GetInstanceData(*this);
 	if (AMouseCritter* Mouse = Data.AIController ? Cast<AMouseCritter>(Data.AIController->GetPawn()) : nullptr)
 	{
-		// Regresa a su velocidad normal.
+		// regresa a su velocidad normal
 		Mouse->GetCharacterMovement()->MaxWalkSpeed = Data.PreviousSpeed > 0.f ? Data.PreviousSpeed : 260.f;
 	}
 }

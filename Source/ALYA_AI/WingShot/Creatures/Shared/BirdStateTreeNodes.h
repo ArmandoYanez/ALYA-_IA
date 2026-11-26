@@ -1,6 +1,6 @@
-// Nodos de StateTree compartidos (tareas, condiciones y evaluadores).
-// Se usan en ST_CommonBird, ST_Owl, ST_Eagle y ST_Mouse.
-// Cada nodo tiene un struct "InstanceData" con sus variables y otro con la logica.
+// nodos de StateTree compartidos (tareas, condiciones y evaluadores)
+// se usan en ST_CommonBird, ST_Owl, ST_Eagle y ST_Mouse
+// Cada nodo tiene un struct "InstanceData" con sus variables y otro con la logica
 
 #pragma once
 
@@ -15,32 +15,26 @@ class AAIController;
 class UDataTable;
 class UEnvQuery;
 
-// =====================================================================
-// Cadena de Markov: elige la siguiente actividad del ave.
-// =====================================================================
+// elige la siguiente actividad del ave
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdMarkovDecideInstanceData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Context")
-	// Controller del ave (lo llena el StateTree).
+	// controller del ave (lo llena el StateTree)
 	TObjectPtr<AAIController> AIController = nullptr;
-
-	// Matriz de transicion (filas FBirdMarkovRow). Nombre de fila = actividad actual.
+	
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	TObjectPtr<UDataTable> MarkovTable = nullptr;
-
-	// Si se llena, usa siempre esta fila (por ejemplo "Disturbed" para atacar o huir al despertar).
+	
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	FName RowOverride;
 
-	// Actividad que se usa si la elegida no es posible (Cazar sin ratones, Atacar sin amenaza).
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	EBirdActivity FallbackActivity = EBirdActivity::Perch;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// Resultado: la actividad elegida.
 	EBirdActivity NextActivity = EBirdActivity::Perch;
 };
 
@@ -52,14 +46,12 @@ struct ALYA_AI_API FStateTreeTask_BirdMarkovDecide : public FStateTreeTaskCommon
 	using FInstanceDataType = FStateTreeTask_BirdMarkovDecideInstanceData;
 
 	virtual const UStruct* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
-	// Se ejecuta una vez al entrar al estado: decide y termina.
+	// se ejecuta una vez al entrar al estado, decide y termina
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };
 
-// =====================================================================
-// Ejecuta un EQS y expone el mejor punto. Sigue corriendo para que los
-// estados hijos lean su resultado por Property Binding.
-// =====================================================================
+// ejecuta un EQS y expone el mejor punto. Sigue corriendo para que los
+// estados hijos lean su resultado por Property Binding
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdFindLocationInstanceData
 {
@@ -69,21 +61,21 @@ struct ALYA_AI_API FStateTreeTask_BirdFindLocationInstanceData
 	TObjectPtr<APawn> Pawn = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// EQS que se va a ejecutar.
+	// EQS que se va a ejecutar
 	TObjectPtr<UEnvQuery> Query = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// Punto encontrado por el EQS.
+	// punto encontrado por el EQS
 	FVector Location = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
 	TObjectPtr<AActor> TargetActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// True cuando el EQS ya respondio.
+	// true cuando el EQS ya respondio
 	bool bFound = false;
 
-	// Id de la consulta EQS (para poder cancelarla).
+	// Id de la consulta EQS (para poder cancelarla)
 	int32 RequestId = INDEX_NONE;
 	EStateTreeRunStatus Status = EStateTreeRunStatus::Running;
 };
@@ -101,9 +93,7 @@ struct ALYA_AI_API FStateTreeTask_BirdFindLocation : public FStateTreeTaskCommon
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };
 
-// =====================================================================
-// Vuela hasta Destination en cuanto bReady sea verdadero.
-// =====================================================================
+// Vuela hasta Destination en cuanto bReady sea verdadero
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdFlyToInstanceData
 {
@@ -113,28 +103,28 @@ struct ALYA_AI_API FStateTreeTask_BirdFlyToInstanceData
 	TObjectPtr<APawn> Pawn = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	// A donde volar (viene del EQS).
+	// A donde volar (viene del EQS)
 	FVector Destination = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<AActor> TargetActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	// True cuando el destino ya es valido.
+	// True cuando el destino ya es valido
 	bool bReady = false;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	float Speed = 650.f;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Altura del arco de vuelo.
+	// altura del arco de vuelo
 	float ArcHeight = 250.f;
 
-	// Sigue al TargetActor mientras vuela (presas que caminan).
+	// Sigue al TargetActor mientras vuela (presas que caminan)
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	bool bTrackTarget = false;
 
-	// Ya empezo a volar.
+	// mpezo a volar
 	bool bStarted = false;
 };
 
@@ -154,9 +144,7 @@ private:
 	bool TryStart(FInstanceDataType& InstanceData) const;
 };
 
-// =====================================================================
-// Espera un tiempo aleatorio (posada en la rama o comiendo).
-// =====================================================================
+// Espera un tiempo aleatorio (posada en la rama o comiendo)
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdIdleInstanceData
 {
@@ -168,7 +156,7 @@ struct ALYA_AI_API FStateTreeTask_BirdIdleInstanceData
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	float MaxTime = 6.f;
 
-	// Tiempo que falta.
+	// tiempo que falta
 	float Remaining = 0.f;
 };
 
@@ -184,9 +172,7 @@ struct ALYA_AI_API FStateTreeTask_BirdIdle : public FStateTreeTaskCommonBase
 	virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };
 
-// =====================================================================
-// Ataque en picada al jugador: lo persigue volando y le hace dano al alcanzarlo.
-// =====================================================================
+// ataque en picada al jugador, lo persigue volando y le hace dano al alcanzarlo
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdAttackPlayerInstanceData
 {
@@ -199,10 +185,10 @@ struct ALYA_AI_API FStateTreeTask_BirdAttackPlayerInstanceData
 	float Speed = 1100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Dano que le hace al jugador.
+	// dano que le hace al jugador
 	float Damage = 20.f;
 
-	// Si no alcanza al jugador en este tiempo, desiste.
+	// Si no alcanza al jugador en este tiempo se rinde, esto no jalaaa
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	float MaxTime = 6.f;
 
@@ -223,9 +209,7 @@ struct ALYA_AI_API FStateTreeTask_BirdAttackPlayer : public FStateTreeTaskCommon
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };
 
-// =====================================================================
-// Condicion: se cumple con una probabilidad dada (decisiones al vuelo).
-// =====================================================================
+// condicion, se cumple con una probabilidad dada (decisiones al vuelo)
 USTRUCT()
 struct ALYA_AI_API FStateTreeCondition_RandomChanceInstanceData
 {
@@ -246,9 +230,7 @@ struct ALYA_AI_API FStateTreeCondition_RandomChance : public FStateTreeCondition
 	virtual bool TestCondition(FStateTreeExecutionContext& Context) const override;
 };
 
-// =====================================================================
-// Condicion: la actividad elegida por Markov es la esperada.
-// =====================================================================
+// Condicion, la actividad elegida por Markov es la esperada
 USTRUCT()
 struct ALYA_AI_API FStateTreeCondition_BirdActivityInstanceData
 {
@@ -272,9 +254,7 @@ struct ALYA_AI_API FStateTreeCondition_BirdActivity : public FStateTreeCondition
 	virtual bool TestCondition(FStateTreeExecutionContext& Context) const override;
 };
 
-// =====================================================================
-// Evaluator: expone al StateTree lo que percibe el ave.
-// =====================================================================
+// Evaluator expone al StateTree lo que percibe el ave
 USTRUCT()
 struct ALYA_AI_API FStateTreeEvaluator_BirdSensesInstanceData
 {
@@ -283,11 +263,11 @@ struct ALYA_AI_API FStateTreeEvaluator_BirdSensesInstanceData
 	UPROPERTY(EditAnywhere, Category = "Context")
 	TObjectPtr<AAIController> AIController = nullptr;
 
-	// Cada cuanto se revisa la distancia al jugador (se desfasa al azar entre aves).
+	// Cada cuanto se revisa la distancia al jugador (se desfasa al azar entre aves)
 	UPROPERTY(EditAnywhere, Category = "Parameter", meta = (ClampMin = "0.05"))
 	float CheckInterval = 0.25f;
 
-	// Controller ya casteado (se resuelve una sola vez en TreeStart).
+	// Controller ya casteado (se resuelve una sola vez en TreeStart)
 	TWeakObjectPtr<class ABirdAIController> CachedController;
 	float TimeToNextCheck = 0.f;
 
@@ -300,7 +280,7 @@ struct ALYA_AI_API FStateTreeEvaluator_BirdSensesInstanceData
 	bool bNervous = false;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// Donde esta la amenaza.
+	// donde esta la amenaza
 	FVector ThreatLocation = FVector::ZeroVector;
 };
 
@@ -316,9 +296,7 @@ struct ALYA_AI_API FStateTreeEvaluator_BirdSenses : public FStateTreeEvaluatorCo
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };
 
-// =====================================================================
-// Evaluator: le pasa a la criatura el estado activo del StateTree (su Blueprint lo muestra).
-// =====================================================================
+// Evaluator, le pasa a la criatura el estado activo del StateTree (su Blueprint lo muestra)
 USTRUCT()
 struct ALYA_AI_API FStateTreeEvaluator_StateLabelInstanceData
 {
@@ -328,7 +306,7 @@ struct ALYA_AI_API FStateTreeEvaluator_StateLabelInstanceData
 	TObjectPtr<APawn> Pawn = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Output")
-	// Ultimo estado mostrado.
+	// Ultimo estado mostrado
 	FName ActiveState;
 
 	float TimeToNextUpdate = 0.f;
@@ -345,9 +323,7 @@ struct ALYA_AI_API FStateTreeEvaluator_StateLabel : public FStateTreeEvaluatorCo
 	virtual void Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const override;
 };
 
-// =====================================================================
-// Reaccion a dano/stun: la criatura queda aturdida unos segundos.
-// =====================================================================
+//Reaccion a dano/stun la criatura queda aturdida unos segundos
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_CreatureStunnedInstanceData
 {
@@ -357,7 +333,7 @@ struct ALYA_AI_API FStateTreeTask_CreatureStunnedInstanceData
 	TObjectPtr<APawn> Pawn = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Segundos que dura aturdido.
+	// segundos que dura aturdido
 	float Duration = 2.5f;
 
 	float Remaining = 0.f;
@@ -376,9 +352,7 @@ struct ALYA_AI_API FStateTreeTask_CreatureStunned : public FStateTreeTaskCommonB
 	virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };
 
-// =====================================================================
-// Precondiciones estilo GOAP (Enter Conditions).
-// =====================================================================
+// Precondiciones estilo GOAP (Enter Conditions)
 USTRUCT()
 struct ALYA_AI_API FStateTreeCondition_PreyAvailableInstanceData
 {
@@ -388,7 +362,7 @@ struct ALYA_AI_API FStateTreeCondition_PreyAvailableInstanceData
 	TObjectPtr<APawn> Pawn = nullptr;
 };
 
-// Cazar solo si existe al menos un raton vivo en el mapa.
+// Cazar solo si existe al menos un raton vivo en el mapa
 USTRUCT(meta = (DisplayName = "Prey Available (GOAP)", Category = "WingShot|Preconditions"))
 struct ALYA_AI_API FStateTreeCondition_PreyAvailable : public FStateTreeConditionCommonBase
 {
@@ -409,11 +383,11 @@ struct ALYA_AI_API FStateTreeCondition_ThreatInRangeInstanceData
 	TObjectPtr<AAIController> AIController = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Parameter")
-	// Distancia maxima para atacar.
+	// Distancia maxima para atacar
 	float Range = 3500.f;
 };
 
-// Atacar solo si hay una amenaza conocida dentro del alcance.
+// Atacar solo si hay una amenaza conocida dentro del alcance
 USTRUCT(meta = (DisplayName = "Threat In Range (GOAP)", Category = "WingShot|Preconditions"))
 struct ALYA_AI_API FStateTreeCondition_ThreatInRange : public FStateTreeConditionCommonBase
 {

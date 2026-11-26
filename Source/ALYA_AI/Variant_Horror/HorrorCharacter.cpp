@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Variant_Horror/HorrorCharacter.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -31,7 +30,7 @@ void AHorrorCharacter::BeginPlay()
 	// initialize sprint meter to max
 	SprintMeter = SprintTime;
 
-	// Initialize the walk speed
+	// initialize the walk speed
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
 	// start the sprint tick timer

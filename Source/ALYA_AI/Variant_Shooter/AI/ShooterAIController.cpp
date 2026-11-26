@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "Variant_Shooter/AI/ShooterAIController.h"
 #include "ShooterNPC.h"
 #include "Components/StateTreeAIComponent.h"

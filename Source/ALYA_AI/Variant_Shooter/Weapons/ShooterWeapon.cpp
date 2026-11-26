@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "ShooterWeapon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
@@ -200,7 +199,7 @@ FTransform AShooterWeapon::CalculateProjectileSpawnTransform(const FVector& Targ
 	// calculate the spawn location ahead of the muzzle
 	const FVector SpawnLoc = MuzzleLoc + ((TargetLocation - MuzzleLoc).GetSafeNormal() * MuzzleOffset);
 
-	// find the aim rotation vector while applying some variance to the target 
+	// find the aim rotation vector while applying some variance to the target
 	const FRotator AimRot = UKismetMathLibrary::FindLookAtRotation(SpawnLoc, TargetLocation + (UKismetMathLibrary::RandomUnitVector() * AimVariance));
 
 	// return the built transform

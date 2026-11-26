@@ -1,4 +1,4 @@
-// Spawner de criaturas (se colocan 4 en el nivel: aves comunes, buhos, aguila y ratones).
+// spawner de criaturas (se colocan 4 en el nivel, aves comunes, buhos, aguila y ratones)
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "BirdSpawner.generated.h"
 
 UENUM(BlueprintType)
-// Tipo de lugar donde aparece la criatura.
+// Tipo de lugar donde aparece la criatura
 enum class ECreatureSpawnPoint : uint8
 {
 	Perch      UMETA(DisplayName = "Percha libre"),
@@ -16,7 +16,7 @@ enum class ECreatureSpawnPoint : uint8
 	MouseRoute UMETA(DisplayName = "Ruta de raton"),
 };
 
-// Coloca criaturas al iniciar y repone las que el jugador atrapa o los depredadores cazan.
+// Coloca criaturas al iniciar y repone las que el jugador atrapa o los depredadores cazan
 UCLASS()
 class ALYA_AI_API ABirdSpawner : public AActor
 {
@@ -26,18 +26,18 @@ public:
 	ABirdSpawner();
 
 	UPROPERTY(EditAnywhere, Category = "Spawner")
-	// Que criatura crear.
+	// Que criatura crear
 	TSubclassOf<APawn> PawnClass;
 
 	UPROPERTY(EditAnywhere, Category = "Spawner")
-	// Donde aparece.
+	// Donde aparece
 	ECreatureSpawnPoint SpawnPoint = ECreatureSpawnPoint::Perch;
 
 	UPROPERTY(EditAnywhere, Category = "Spawner", meta = (ClampMin = "0"))
-	// Cuantas crear al iniciar.
+	// Cuantas crear al iniciar
 	int32 Count = 10;
 
-	// Segundos para reponer una criatura (0 = no reponer).
+	// Segundos para reponer una criatura (0 = no reponer)
 	UPROPERTY(EditAnywhere, Category = "Spawner", meta = (ClampMin = "0.0"))
 	float RespawnDelay = 25.f;
 

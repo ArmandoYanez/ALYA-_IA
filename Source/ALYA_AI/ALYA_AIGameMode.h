@@ -18,5 +18,3 @@ public:
 	AALYA_AIGameMode();
 };
 
-
-

@@ -10,7 +10,7 @@
 
 namespace WingShot
 {
-	// Tags de los eventos (definidos en Config/DefaultGameplayTags.ini).
+	// tags de los eventos (definidos en Config/DefaultGameplayTags.ini)
 	FGameplayTag ScaredTag()
 	{
 		static const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("WingShot.Bird.Scared"));
@@ -34,7 +34,7 @@ namespace WingShot
 		const AController* Controller = Creature ? Creature->GetController() : nullptr;
 		if (UStateTreeComponent* StateTree = Controller ? Controller->FindComponentByClass<UStateTreeComponent>() : nullptr)
 		{
-			// El StateTree vive en el controller, no en el pawn.
+			// El StateTree vive en el controller, no en el pawn
 			StateTree->SendStateTreeEvent(Tag);
 		}
 	}
@@ -45,7 +45,7 @@ namespace WingShot
 		{
 			return;
 		}
-		// Busca aves y ratones dentro del radio y les manda Stunned.
+		// Busca aves y ratones dentro del radio y les manda Stunned
 		for (TActorIterator<APawn> It(World); It; ++It)
 		{
 			APawn* Pawn = *It;

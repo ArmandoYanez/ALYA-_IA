@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "HorrorUI.h"
 #include "HorrorCharacter.h"
 

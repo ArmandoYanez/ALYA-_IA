@@ -11,20 +11,20 @@ struct ALYA_AI_API FStateTreeEvaluator_PerceptionInstanceData
 {
 	GENERATED_BODY()
 
-	// AIController del NPC; se enlaza automaticamente al Context Data del schema.
+	// AIController del NPC; se enlaza automaticamente al Context Data del schema
 	UPROPERTY(EditAnywhere, Category = "Context")
 	TObjectPtr<AAIController> AIController = nullptr;
 
-	// Salida para el StateTree: true mientras el NPC ve al objetivo.
+	// Salida para el StateTree, true mientras el NPC ve al objetivo
 	UPROPERTY(EditAnywhere, Category = "Output")
 	bool bHasTarget = false;
 
-	// Salida para el StateTree: el objetivo percibido (el jugador).
+	// Salida para el StateTree, el objetivo percibido (el jugador)
 	UPROPERTY(EditAnywhere, Category = "Output")
 	TObjectPtr<AActor> TargetActor = nullptr;
 };
 
-// Evaluator que expone al StateTree lo que detecta el AI Perception del controller.
+// Evaluator que expone al StateTree lo que detecta el AI Perception del controller
 USTRUCT(meta = (DisplayName = "AI Perception (Sight)", Category = "AI|Perception"))
 struct ALYA_AI_API FStateTreeEvaluator_Perception : public FStateTreeEvaluatorCommonBase
 {

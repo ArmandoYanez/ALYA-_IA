@@ -1,4 +1,4 @@
-// Contextos y tests de EQS hechos a medida para las aves.
+// contextos y tests de EQS hechos a medida para las aves
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "EnvironmentQuery/EnvQueryTest.h"
 #include "BirdEQS.generated.h"
 
-// Contexto EQS: el jugador (primer pawn controlado por jugador).
+// Contexto EQS, el jugador (primer pawn controlado por jugador)
 UCLASS(meta = (DisplayName = "EQC_WingShotPlayer"))
 class ALYA_AI_API UEnvQueryContext_WingShotPlayer : public UEnvQueryContext
 {
@@ -17,7 +17,7 @@ public:
 	virtual void ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const override;
 };
 
-// Contexto EQS: la ultima ubicacion de la amenaza que percibio el ave (desde su AIController).
+// Contexto EQS, la ultima ubicacion de la amenaza que percibio el ave (desde su AIController)
 UCLASS(meta = (DisplayName = "EQC_BirdThreat"))
 class ALYA_AI_API UEnvQueryContext_BirdThreat : public UEnvQueryContext
 {
@@ -27,7 +27,7 @@ public:
 	virtual void ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const override;
 };
 
-// Test EQS: descarta las perchas que ya tiene ocupadas (o apartadas) otra ave.
+// Test EQS, descarta las perchas que ya tiene ocupadas (o apartadas) otra ave
 UCLASS(meta = (DisplayName = "Perch Available"))
 class ALYA_AI_API UEnvQueryTest_PerchAvailable : public UEnvQueryTest
 {
@@ -41,7 +41,7 @@ public:
 	virtual FText GetDescriptionDetails() const override;
 };
 
-// Test EQS: descarta presas (ratones) que ya estan muertas.
+// Test EQS, descarta presas (ratones) que ya estan muertas
 UCLASS(meta = (DisplayName = "Prey Alive"))
 class ALYA_AI_API UEnvQueryTest_PreyAlive : public UEnvQueryTest
 {
@@ -55,7 +55,7 @@ public:
 	virtual FText GetDescriptionDetails() const override;
 };
 
-// Test EQS: puntua mejor las perchas marcadas como de buho (altas y escondidas).
+// Test EQS, puntua mejor las perchas marcadas como de buho (altas y escondidas)
 UCLASS(meta = (DisplayName = "Owl Perch"))
 class ALYA_AI_API UEnvQueryTest_OwlPerch : public UEnvQueryTest
 {

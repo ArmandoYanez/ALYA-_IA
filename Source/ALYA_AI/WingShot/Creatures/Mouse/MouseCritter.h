@@ -1,4 +1,4 @@
-// Raton (Character para usar el NavMesh).
+// raton (Character para usar el NavMesh)
 
 #pragma once
 
@@ -8,8 +8,8 @@
 
 class UStateTree;
 
-// Raton: presa del buho y del aguila. Camina de A a B por su ruta y muere al ser cazado.
-// Solo logica: el modelo, la animacion y el texto se arman en el Blueprint hijo (BP_Mouse).
+// raton, presa del buho y del aguila. Camina de A a B por su ruta y muere al ser cazado
+// Solo logica, el modelo, la animacion y el texto se arman en el Blueprint hijo (BP_Mouse)
 UCLASS()
 class ALYA_AI_API AMouseCritter : public ACharacter
 {
@@ -21,11 +21,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Mouse")
 	bool IsAlive() const { return !bDead; }
 
-	// Lo llama el depredador al atraparlo: se queda estatico y desaparece.
+	// Lo llama el depredador al atraparlo, se queda estatico y desaparece
 	void Kill(AActor* Killer);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mouse")
-	// Ruta que recorre (la asigna el spawner).
+	// ruta que recorre (la asigna el spawner)
 	int32 RouteId = 0;
 
 	UStateTree* GetBehaviorStateTree() const;
@@ -36,24 +36,24 @@ public:
 	bool IsStunned() const { return bStunned; }
 
 	// --- Estado del StateTree (para el texto sobre la cabeza) ---
-	// Lo llama el evaluador StateLabel cuando cambia el estado activo.
+	// Lo llama el evaluador StateLabel cuando cambia el estado activo
 	void SetCurrentState(FName NewState);
 
-	// Nombre del estado actual del StateTree (ej. "Walk", "Flee").
+	// nombre del estado actual del StateTree (ej. "Walk", "Flee")
 	UFUNCTION(BlueprintPure, Category = "Mouse")
 	FName GetCurrentState() const { return CurrentState; }
 
-	// Evento para el Blueprint: se dispara cada vez que cambia el estado. Ahi actualizas tu texto.
+	// Evento para el Blueprint, se dispara cada vez que cambia el estado. Ahi actualizas tu texto
 	UFUNCTION(BlueprintImplementableEvent, Category = "Mouse")
 	void OnStateChanged(FName NewState);
 
-	// Evento para el Blueprint: lo cazaron (ahi puedes poner su animacion o efecto de muerte).
+	// evento para el Blueprint, lo cazaron (ahi puedes poner su animacion o efecto de muerte)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Mouse")
 	void OnKilled();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Mouse")
-	// Su cerebro: ST_Mouse.
+	// su cerebro, ST_Mouse
 	TSoftObjectPtr<UStateTree> BehaviorTreeAsset;
 
 private:

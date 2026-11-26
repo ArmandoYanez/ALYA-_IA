@@ -16,7 +16,7 @@ void ABirdSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Crea todas al iniciar el juego.
+	// crea todas al iniciar el juego
 	for (int32 i = 0; i < Count; ++i)
 	{
 		SpawnCreature();
@@ -34,7 +34,7 @@ void ABirdSpawner::SpawnCreature()
 	AActor* SpawnAt = nullptr;
 	int32 RouteId = 0;
 
-	// Elige un punto al azar segun el tipo.
+	// elige un punto al azar segun el tipo
 	switch (SpawnPoint)
 	{
 	case ECreatureSpawnPoint::Perch:
@@ -63,7 +63,7 @@ void ABirdSpawner::SpawnCreature()
 	}
 	case ECreatureSpawnPoint::MouseRoute:
 	{
-		// Prefiere una ruta que todavia no tenga raton.
+		// Prefiere una ruta que todavia no tenga raton
 		TArray<AMousePathPoint*> Points;
 		for (TActorIterator<AMousePathPoint> It(World); It; ++It)
 		{
@@ -99,7 +99,7 @@ void ABirdSpawner::SpawnCreature()
 		return;
 	}
 
-	// La ruta se asigna antes de terminar el spawn para que su StateTree ya la conozca.
+	// La ruta se asigna antes de terminar el spawn para que su StateTree ya la conozca
 	if (AMouseCritter* Mouse = Cast<AMouseCritter>(Pawn))
 	{
 		Mouse->RouteId = RouteId;
@@ -110,11 +110,11 @@ void ABirdSpawner::SpawnCreature()
 	{
 		if (ABirdPerch* Perch = Cast<ABirdPerch>(SpawnAt))
 		{
-			// Las aves empiezan posadas.
+			// Las aves empiezan posadas
 			Bird->PlaceOnPerch(Perch);
 		}
 	}
-	// Cuando muera o la atrapen, se repone.
+	// Cuando muera o la atrapen, se repone
 	Pawn->OnDestroyed.AddDynamic(this, &ABirdSpawner::HandleCreatureDestroyed);
 }
 
@@ -125,6 +125,6 @@ void ABirdSpawner::HandleCreatureDestroyed(AActor* DestroyedActor)
 		return;
 	}
 	FTimerHandle Handle;
-	// Crea otra despues de RespawnDelay segundos.
+	// crea otra despues de RespawnDelay segundos
 	GetWorldTimerManager().SetTimer(Handle, this, &ABirdSpawner::SpawnCreature, RespawnDelay, false);
 }

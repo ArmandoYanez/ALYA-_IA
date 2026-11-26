@@ -1,4 +1,4 @@
-// Controller del raton: percepcion y su StateTree.
+// Controller del raton, percepcion y su StateTree
 
 #pragma once
 
@@ -12,7 +12,7 @@ class UAISenseConfig_Sight;
 class UAISenseConfig_Hearing;
 class UStateTreeAIComponent;
 
-// Controlador del raton: ejecuta su StateTree y percibe al jugador y a los depredadores para huir.
+// controlador del raton, ejecuta su StateTree y percibe al jugador y a los depredadores para huir
 UCLASS()
 class ALYA_AI_API AMouseAIController : public AAIController
 {
@@ -41,7 +41,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI|Perception")
 	TObjectPtr<UAISenseConfig_Hearing> HearingConfig;
 
-	// Tiempo minimo entre dos sustos.
+	// Tiempo minimo entre dos sustos
 	UPROPERTY(EditAnywhere, Category = "AI|Fear")
 	float ScareCooldown = 2.f;
 

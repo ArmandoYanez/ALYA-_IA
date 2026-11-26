@@ -1,4 +1,4 @@
-// Constructores de los puntos del nivel (solo un icono en el editor).
+// constructores de los puntos del nivel (solo un icono en el editor)
 
 #include "WingShot/World/BirdPerch.h"
 
@@ -54,7 +54,7 @@ ABirdFeedSpot::ABirdFeedSpot()
 
 FVector ABirdFeedSpot::GetRandomFeedLocation() const
 {
-	// Punto al azar dentro del circulo.
+	// Punto al azar dentro del circulo
 	const FVector2D Offset = FMath::RandPointInCircle(Radius);
 	return GetActorLocation() + FVector(Offset.X, Offset.Y, 0.f);
 }

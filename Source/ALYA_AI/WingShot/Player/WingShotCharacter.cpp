@@ -16,7 +16,7 @@ AWingShotCharacter::AWingShotCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Acciones de input por defecto (creadas por Tools/setup_player.py).
+	// acciones de input por defecto (creadas por Tools/setup_player.py)
 	static ConstructorHelpers::FObjectFinder<UInputAction> SneakFinder(TEXT("/Game/WingShot/Input/IA_Sneak.IA_Sneak"));
 	static ConstructorHelpers::FObjectFinder<UInputAction> BinocularsFinder(TEXT("/Game/WingShot/Input/IA_Binoculars.IA_Binoculars"));
 	static ConstructorHelpers::FObjectFinder<UInputAction> FireNetFinder(TEXT("/Game/WingShot/Input/IA_FireNet.IA_FireNet"));
@@ -34,7 +34,7 @@ void AWingShotCharacter::BeginPlay()
 	DefaultFOV = GetFirstPersonCameraComponent()->FieldOfView;
 }
 
-// Conecta las teclas: Ctrl = sigilo, clic derecho = binoculares, clic izquierdo = red.
+// Conecta las teclas, Ctrl = sigilo, clic derecho = binoculares, clic izquierdo = red
 void AWingShotCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -62,7 +62,7 @@ void AWingShotCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Zoom suave de los binoculares.
+	// Zoom suave de los binoculares
 	UCameraComponent* Camera = GetFirstPersonCameraComponent();
 	const float TargetFOV = bUsingBinoculars ? BinocularsFOV : DefaultFOV;
 	Camera->SetFieldOfView(FMath::FInterpTo(Camera->FieldOfView, TargetFOV, DeltaSeconds, ZoomInterpSpeed));
@@ -72,12 +72,12 @@ void AWingShotCharacter::Tick(float DeltaSeconds)
 
 void AWingShotCharacter::DoAim(float Yaw, float Pitch)
 {
-	// Con los binoculares la camara se mueve mas lento para poder apuntar con precision.
+	// Con los binoculares la camara se mueve mas lento para poder apuntar con precision
 	const float Scale = bUsingBinoculars ? BinocularsLookScale : 1.0f;
 	Super::DoAim(Yaw * Scale, Pitch * Scale);
 }
 
-// Sigilo: camina lento y hace menos ruido.
+// Sigilo, camina lento y hace menos ruido
 void AWingShotCharacter::StartSneak()
 {
 	bIsSneaking = true;
@@ -90,7 +90,7 @@ void AWingShotCharacter::StopSneak()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-// Binoculares: oculta los brazos; el zoom se hace en Tick.
+// Binoculares, oculta los brazos; el zoom se hace en Tick
 void AWingShotCharacter::StartBinoculars()
 {
 	bUsingBinoculars = true;
@@ -119,10 +119,10 @@ void AWingShotCharacter::UpdateFootstepNoise(float DeltaSeconds)
 	}
 	FootstepTimer = 0.0f;
 
-	// Los pasos sigilosos se oyen mucho mas cerca: asi el jugador puede acercarse a las aves.
+	// Los pasos sigilosos se oyen mucho mas cerca, asi el jugador puede acercarse a las aves
 	const float Range = bIsSneaking ? SneakNoiseRange : WalkNoiseRange;
 	const float Loudness = bIsSneaking ? 0.2f : 1.0f;
-	// Ruido que las criaturas oyen con AI Perception.
+	// ruido que las criaturas oyen con AI Perception
 	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, Range, TEXT("Footstep"));
 }
 
@@ -143,14 +143,14 @@ void AWingShotCharacter::FireNet()
 	Params.Owner = this;
 	Params.Instigator = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	// Dispara la red desde la camara.
+	// Dispara la red desde la camara
 	GetWorld()->SpawnActor<AActor>(NetClass, SpawnLocation, AimRotation, Params);
 
-	// Disparar hace ruido: las aves cercanas lo escuchan.
+	// disparar hace ruido, las aves cercanas lo escuchan
 	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 1.0f, this, 2000.0f, TEXT("NetShot"));
 }
 
-// Suma una captura (el numero del HUD).
+// suma una captura (el numero del HUD)
 void AWingShotCharacter::RegisterCatch(FName Species)
 {
 	CaughtBySpecies.FindOrAdd(Species)++;
@@ -162,10 +162,10 @@ void AWingShotCharacter::RegisterCatch(FName Species)
 float AWingShotCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	const float Applied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	// Baja la vida (ataques de buho y aguila).
+	// Baja la vida (ataques de buho y aguila)
 	Health = FMath::Max(0.f, Health - DamageAmount);
 
-	// Empujon en direccion contraria al atacante.
+	// empujon en direccion contraria al atacante
 	if (DamageCauser)
 	{
 		const FVector Push = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D() * 600.f + FVector(0.f, 0.f, 250.f);
@@ -174,7 +174,7 @@ float AWingShotCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dam
 
 	UE_LOG(LogTemp, Display, TEXT("%s ataco al jugador (-%.0f)"), *GetNameSafe(DamageCauser), DamageAmount);
 
-	// Noqueado: reaparece en el inicio con la salud completa.
+	// Noqueado, reaparece en el inicio con la salud completa
 	if (Health <= 0.f)
 	{
 		if (const AActor* Start = UGameplayStatics::GetActorOfClass(this, APlayerStart::StaticClass()))

@@ -1,4 +1,4 @@
-// Tipos de datos de la IA: actividades y fila de la tabla de Markov.
+// tipos de datos de la IA, actividades y fila de la tabla de Markov
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include "Engine/DataTable.h"
 #include "BirdTypes.generated.h"
 
-// Actividades que puede elegir la cadena de Markov de una criatura.
+// Actividades que puede elegir la cadena de Markov de una criatura
 UENUM(BlueprintType)
 enum class EBirdActivity : uint8
 {
@@ -21,8 +21,8 @@ enum class EBirdActivity : uint8
 	Search   UMETA(DisplayName = "Buscar presa"),
 };
 
-// Fila de la matriz de transicion: probabilidad de pasar a cada actividad
-// desde la actividad actual (el nombre de la fila). Cada fila debe sumar 1.
+// fila de la matriz de transicion, probabilidad de pasar a cada actividad
+// desde la actividad actual (el nombre de la fila). Cada fila debe sumar 1
 USTRUCT(BlueprintType)
 struct ALYA_AI_API FBirdMarkovRow : public FTableRowBase
 {
@@ -55,7 +55,7 @@ struct ALYA_AI_API FBirdMarkovRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Markov")
 	float Search = 0.f;
 
-	// Regresa la probabilidad de una actividad.
+	// Regresa la probabilidad de una actividad
 	float Get(EBirdActivity Activity) const
 	{
 		switch (Activity)
@@ -73,7 +73,7 @@ struct ALYA_AI_API FBirdMarkovRow : public FTableRowBase
 		return 0.f;
 	}
 
-	// Cambia la probabilidad de una actividad.
+	// Cambia la probabilidad de una actividad
 	void Set(EBirdActivity Activity, float Value)
 	{
 		switch (Activity)

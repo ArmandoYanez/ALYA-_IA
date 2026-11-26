@@ -1,4 +1,4 @@
-// Nodos de StateTree exclusivos del buho.
+// Nodos de StateTree exclusivos del buho
 
 #pragma once
 
@@ -6,9 +6,7 @@
 #include "StateTreeTaskBase.h"
 #include "OwlStateTreeNodes.generated.h"
 
-// =====================================================================
-// Duerme un tiempo aleatorio (buho). Mientras duerme solo lo despierta un ruido fuerte.
-// =====================================================================
+// Duerme un tiempo aleatorio (buho). Mientras duerme solo lo despierta un ruido fuerte
 USTRUCT()
 struct ALYA_AI_API FStateTreeTask_BirdSleepInstanceData
 {
@@ -23,7 +21,7 @@ struct ALYA_AI_API FStateTreeTask_BirdSleepInstanceData
 	UPROPERTY(EditAnywhere, Category = "Parameter")
 	float MaxTime = 15.f;
 
-	// Tiempo que falta para despertar.
+	// tiempo que falta para despertar
 	float Remaining = 0.f;
 };
 

@@ -22,7 +22,7 @@ void UEnvQueryContext_WingShotPlayer::ProvideContext(FEnvQueryInstance& QueryIns
 	{
 		if (APawn* Player = UGameplayStatics::GetPlayerPawn(Querier, 0))
 		{
-			// El contexto es el jugador.
+			// el contexto es el jugador
 			UEnvQueryItemType_Actor::SetContextHelper(ContextData, Player);
 		}
 	}
@@ -33,7 +33,7 @@ void UEnvQueryContext_BirdThreat::ProvideContext(FEnvQueryInstance& QueryInstanc
 	const APawn* Bird = Cast<APawn>(GetQuerierActor(QueryInstance));
 	if (const ABirdAIController* Controller = Bird ? Cast<ABirdAIController>(Bird->GetController()) : nullptr)
 	{
-		// El contexto es el punto de la ultima amenaza.
+		// el contexto es el punto de la ultima amenaza
 		UEnvQueryItemType_Point::SetContextHelper(ContextData, Controller->GetThreatLocation());
 	}
 }
@@ -55,7 +55,7 @@ void UEnvQueryTest_PerchAvailable::RunTest(FEnvQueryInstance& QueryInstance) con
 	for (FEnvQueryInstance::ItemIterator It(this, QueryInstance); It; ++It)
 	{
 		const ABirdPerch* Perch = Cast<ABirdPerch>(GetItemActor(QueryInstance, It.GetIndex()));
-		// Pasa solo si la rama esta libre.
+		// Pasa solo si la rama esta libre
 		const bool bAvailable = Perch && Perch->IsAvailableFor(Querier);
 		It.SetScore(TestPurpose, FilterType, bAvailable, bWantsAvailable);
 	}
@@ -87,7 +87,7 @@ void UEnvQueryTest_PreyAlive::RunTest(FEnvQueryInstance& QueryInstance) const
 	for (FEnvQueryInstance::ItemIterator It(this, QueryInstance); It; ++It)
 	{
 		const AMouseCritter* Mouse = Cast<AMouseCritter>(GetItemActor(QueryInstance, It.GetIndex()));
-		// Pasa solo si el raton esta vivo.
+		// pasa solo si el raton esta vivo
 		It.SetScore(TestPurpose, FilterType, Mouse && Mouse->IsAlive(), bWantsAlive);
 	}
 }
@@ -118,7 +118,7 @@ void UEnvQueryTest_OwlPerch::RunTest(FEnvQueryInstance& QueryInstance) const
 	for (FEnvQueryInstance::ItemIterator It(this, QueryInstance); It; ++It)
 	{
 		const ABirdPerch* Perch = Cast<ABirdPerch>(GetItemActor(QueryInstance, It.GetIndex()));
-		// Mas puntos si es percha de buho.
+		// Mas puntos si es percha de buho
 		It.SetScore(TestPurpose, FilterType, Perch && Perch->bOwlPerch, bWantsOwlPerch);
 	}
 }

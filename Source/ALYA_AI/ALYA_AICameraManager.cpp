@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "ALYA_AICameraManager.h"
 
 AALYA_AICameraManager::AALYA_AICameraManager()

@@ -1,6 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-
 #include "ShooterPickup.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"

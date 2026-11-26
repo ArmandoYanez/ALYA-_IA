@@ -11,11 +11,11 @@
 ABirdBase::ABirdBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	// Cada ave se controla con un BirdAIController.
+	// Cada ave se controla con un BirdAIController
 	AIControllerClass = ABirdAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	// Colision: la red choca con esta esfera.
+	// colision, la red choca con esta esfera
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	Collision->InitSphereRadius(28.f);
 	Collision->SetCollisionProfileName(TEXT("Pawn"));
@@ -25,7 +25,7 @@ ABirdBase::ABirdBase()
 void ABirdBase::SetCurrentState(FName NewState)
 {
 	CurrentState = NewState;
-	// Avisa al Blueprint para que actualice su texto.
+	// Avisa al Blueprint para que actualice su texto
 	OnStateChanged(NewState);
 }
 
@@ -36,7 +36,7 @@ UStateTree* ABirdBase::GetBehaviorStateTree() const
 
 void ABirdBase::FlyTo(const FVector& Destination, float Speed, float ArcHeight)
 {
-	// Guarda inicio y fin; el Tick mueve al ave entre ellos.
+	// Guarda inicio y fin; el Tick mueve al ave entre ellos
 	FlightStart = GetActorLocation();
 	FlightEnd = Destination + FVector(0.f, 0.f, SitHeight);
 	FlightAlpha = 0.f;
@@ -45,7 +45,7 @@ void ABirdBase::FlyTo(const FVector& Destination, float Speed, float ArcHeight)
 	bFlying = true;
 	bOnGround = false;
 
-	// Al despegar deja libre la rama donde estaba.
+	// Al despegar deja libre la rama donde estaba
 	if (CurrentPerch.IsValid() && CurrentPerch != ReservedPerch)
 	{
 		CurrentPerch->Release(this);
@@ -70,7 +70,7 @@ void ABirdBase::OnArrived(AActor* Target)
 	}
 	else if (AMouseCritter* Mouse = Cast<AMouseCritter>(Target))
 	{
-		// Caza: si la presa sigue cerca, la atrapa y se queda en el suelo comiendo.
+		// caza, si la presa sigue cerca, la atrapa y se queda en el suelo comiendo
 		if (Mouse->IsAlive() && FVector::Dist2D(Mouse->GetActorLocation(), GetActorLocation()) < 250.f)
 		{
 			Mouse->Kill(this);
@@ -79,12 +79,12 @@ void ABirdBase::OnArrived(AActor* Target)
 	}
 	else
 	{
-		// Llego al suelo (zona de comida).
+		// llego al suelo (zona de comida)
 		bOnGround = true;
 	}
 }
 
-// Aparta la rama a la que va a volar.
+// aparta la rama a la que va a volar
 void ABirdBase::ReservePerch(ABirdPerch* Perch)
 {
 	if (ReservedPerch.IsValid() && ReservedPerch != CurrentPerch)
@@ -128,7 +128,7 @@ void ABirdBase::ReleasePerches()
 	ReservedPerch.Reset();
 }
 
-// Tick solo para mover al ave en su vuelo. La IA no esta aqui, esta en el StateTree.
+// Tick solo para mover al ave en su vuelo. La IA no esta aqui, esta en el StateTree
 void ABirdBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -138,13 +138,13 @@ void ABirdBase::Tick(float DeltaSeconds)
 		return;
 	}
 
-	// Vuelo en arco: interpolacion lineal + parabola de altura.
+	// Vuelo en arco, interpolacion lineal + parabola de altura
 	FlightAlpha = FMath::Min(1.f, FlightAlpha + DeltaSeconds / FlightDuration);
 	const float Smooth = FMath::InterpEaseInOut(0.f, 1.f, FlightAlpha, 1.6f);
 	FVector NewLocation = FMath::Lerp(FlightStart, FlightEnd, Smooth);
 	NewLocation.Z += FlightArc * 4.f * Smooth * (1.f - Smooth);
 
-	// Gira hacia donde vuela.
+	// gira hacia donde vuela
 	const FVector Direction = (FlightEnd - FlightStart).GetSafeNormal2D();
 	if (!Direction.IsNearlyZero())
 	{
@@ -159,7 +159,7 @@ void ABirdBase::Tick(float DeltaSeconds)
 	}
 }
 
-// Atrapada por la red: apaga la IA y desaparece.
+// atrapada por la red, apaga la IA y desaparece
 void ABirdBase::OnCaughtByNet_Implementation(AActor* Catcher)
 {
 	if (bCaught)

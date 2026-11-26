@@ -18,9 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "WingShot/Creatures/Shared/CreatureCommon.h"
 
-// ---------------------------------------------------------------------
 // Markov
-// ---------------------------------------------------------------------
 EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -31,7 +29,7 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// 1. Fila de la matriz: la actividad actual, o "Nervous" si se asusto hace poco.
+	// 1. Fila de la matriz, la actividad actual, o "Nervous" si se asusto hace poco
 	const UEnum* ActivityEnum = StaticEnum<EBirdActivity>();
 	FName CurrentRow = FName(*ActivityEnum->GetNameStringByValue(static_cast<int64>(Controller->GetLastActivity())));
 	if (!Data.RowOverride.IsNone())
@@ -46,7 +44,7 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 	const FBirdMarkovRow* Row = Data.MarkovTable->FindRow<FBirdMarkovRow>(CurrentRow, TEXT("BirdMarkov"), false);
 	if (!Row)
 	{
-		// Fila inicial: la primera de la tabla.
+		// Fila inicial, la primera de la tabla
 		const TArray<FName> RowNames = Data.MarkovTable->GetRowNames();
 		Row = RowNames.Num() > 0 ? Data.MarkovTable->FindRow<FBirdMarkovRow>(RowNames[0], TEXT("BirdMarkov")) : nullptr;
 	}
@@ -55,7 +53,7 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// 2. Normalizacion: la fila debe sumar 1.0; si no, se avisa y se escala el muestreo.
+	// 2. Normalizacion, la fila debe sumar 1.0; si no, se avisa y se escala el muestreo
 	float RowSum = 0.f;
 	for (int32 Index = 0; Index < ActivityEnum->NumEnums() - 1; ++Index)
 	{
@@ -70,7 +68,7 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 		UE_LOG(LogTemp, Warning, TEXT("Markov: la fila %s suma %.3f (deberia ser 1.0); se normaliza."), *CurrentRow.ToString(), RowSum);
 	}
 
-	// 3. Muestreo: numero aleatorio contra las probabilidades acumuladas.
+	// 3. Muestreo, numero aleatorio contra las probabilidades acumuladas
 	const float RandomValue = FMath::FRand() * RowSum;
 	float Accumulated = 0.f;
 	EBirdActivity Next = EBirdActivity::Perch;
@@ -85,13 +83,13 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 		}
 	}
 
-	// Desde el suelo no se puede "seguir posada": primero tiene que volar a una rama.
+	// Desde el suelo no se puede "seguir posada", primero tiene que volar a una rama
 	if (Next == EBirdActivity::Perch && Bird->IsOnGround())
 	{
 		Next = EBirdActivity::Relocate;
 	}
 
-	// Cazar solo si hay un raton vivo; atacar solo si hay una amenaza conocida cerca.
+	// Cazar solo si hay un raton vivo; atacar solo si hay una amenaza conocida cerca
 	if (Next == EBirdActivity::Hunt)
 	{
 		bool bPreyAlive = false;
@@ -113,9 +111,9 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 		}
 	}
 
-	// Guarda el resultado; las transiciones del StateTree lo leen.
+	// Guarda el resultado; las transiciones del StateTree lo leen
 	Data.NextActivity = Next;
-	// Recuerda la actividad para la siguiente decision.
+	// Recuerda la actividad para la siguiente decision
 	Controller->SetLastActivity(Next);
 
 	UE_LOG(LogTemp, Display, TEXT("%s Markov [%s] R=%.2f -> %s"), *Bird->GetName(), *CurrentRow.ToString(), RandomValue,
@@ -123,9 +121,7 @@ EStateTreeRunStatus FStateTreeTask_BirdMarkovDecide::EnterState(FStateTreeExecut
 	return EStateTreeRunStatus::Succeeded;
 }
 
-// ---------------------------------------------------------------------
 // Find Location (EQS)
-// ---------------------------------------------------------------------
 EStateTreeRunStatus FStateTreeTask_BirdFindLocation::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -138,7 +134,7 @@ EStateTreeRunStatus FStateTreeTask_BirdFindLocation::EnterState(FStateTreeExecut
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// Lanza el EQS de forma asincrona (no congela el juego).
+	// lanza el EQS de forma asincrona (no congela el juego)
 	FEnvQueryRequest Request(Data.Query, Data.Pawn);
 	Data.RequestId = Request.Execute(EEnvQueryRunMode::SingleResult,
 		FQueryFinishedSignature::CreateLambda([WeakContext = Context.MakeWeakExecutionContext()](TSharedPtr<FEnvQueryResult> Result) mutable
@@ -158,7 +154,7 @@ EStateTreeRunStatus FStateTreeTask_BirdFindLocation::EnterState(FStateTreeExecut
 				return;
 			}
 
-			// Toma el mejor resultado.
+			// Toma el mejor resultado
 			AActor* Actor = Result->GetItemAsActor(0);
 			Data->TargetActor = Actor;
 			Data->Location = Result->GetItemAsLocation(0);
@@ -167,17 +163,17 @@ EStateTreeRunStatus FStateTreeTask_BirdFindLocation::EnterState(FStateTreeExecut
 			{
 				if (ABirdPerch* Perch = Cast<ABirdPerch>(Actor))
 				{
-					// Aparta la rama para que otra ave no la use.
+					// Aparta la rama para que otra ave no la use
 					Bird->ReservePerch(Perch);
 				}
 			}
 			if (const ABirdFeedSpot* Spot = Cast<ABirdFeedSpot>(Actor))
 			{
-				// En una zona de comida elige un punto al azar.
+				// En una zona de comida elige un punto al azar
 				Data->Location = Spot->GetRandomFeedLocation();
 			}
 
-			// No termina: los estados hijos leen Location/TargetActor por binding.
+			// No termina, los estados hijos leen Location/TargetActor por binding
 			Data->bFound = true;
 		}));
 
@@ -186,7 +182,7 @@ EStateTreeRunStatus FStateTreeTask_BirdFindLocation::EnterState(FStateTreeExecut
 
 EStateTreeRunStatus FStateTreeTask_BirdFindLocation::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
-	// Sigue corriendo mientras el EQS no falle.
+	// sigue corriendo mientras el EQS no falle
 	return Context.GetInstanceData(*this).Status;
 }
 
@@ -197,16 +193,14 @@ void FStateTreeTask_BirdFindLocation::ExitState(FStateTreeExecutionContext& Cont
 	{
 		if (UEnvQueryManager* Manager = UEnvQueryManager::GetCurrent(Data.Pawn))
 		{
-			// Si salimos del estado antes, cancela el EQS.
+			// Si salimos del estado antes, cancela el EQS
 			Manager->AbortQuery(Data.RequestId);
 		}
 		Data.RequestId = INDEX_NONE;
 	}
 }
 
-// ---------------------------------------------------------------------
 // Fly To
-// ---------------------------------------------------------------------
 bool FStateTreeTask_BirdFlyTo::TryStart(FInstanceDataType& Data) const
 {
 	ABirdBase* Bird = Cast<ABirdBase>(Data.Pawn);
@@ -214,7 +208,7 @@ bool FStateTreeTask_BirdFlyTo::TryStart(FInstanceDataType& Data) const
 	{
 		return false;
 	}
-	// Empieza el vuelo en arco.
+	// Empieza el vuelo en arco
 	Bird->FlyTo(Data.Destination, Data.Speed, Data.ArcHeight);
 	Data.bStarted = true;
 	return true;
@@ -241,14 +235,14 @@ EStateTreeRunStatus FStateTreeTask_BirdFlyTo::Tick(FStateTreeExecutionContext& C
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// Espera a que el EQS del estado padre tenga resultado.
+	// Espera a que el EQS del estado padre tenga resultado
 	if (!Data.bStarted)
 	{
 		TryStart(Data);
 		return EStateTreeRunStatus::Running;
 	}
 
-	// Mientras vuela, si persigue una presa actualiza el destino.
+	// Mientras vuela, si persigue una presa actualiza el destino
 	if (Bird->IsFlying())
 	{
 		if (Data.bTrackTarget && IsValid(Data.TargetActor))
@@ -258,7 +252,7 @@ EStateTreeRunStatus FStateTreeTask_BirdFlyTo::Tick(FStateTreeExecutionContext& C
 		return EStateTreeRunStatus::Running;
 	}
 
-	// Llego: se posa (o atrapa al raton).
+	// llego, se posa (o atrapa al raton)
 	Bird->OnArrived(Data.TargetActor);
 	return EStateTreeRunStatus::Succeeded;
 }
@@ -270,19 +264,17 @@ void FStateTreeTask_BirdFlyTo::ExitState(FStateTreeExecutionContext& Context, co
 	{
 		if (Bird->IsFlying())
 		{
-			// Si el estado se interrumpe, deja de volar.
+			// Si el estado se interrumpe, deja de volar
 			Bird->StopFlight();
 		}
 	}
 }
 
-// ---------------------------------------------------------------------
 // Idle
-// ---------------------------------------------------------------------
 EStateTreeRunStatus FStateTreeTask_BirdIdle::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
-	// Tiempo de espera al azar.
+	// Tiempo de espera al azar
 	Data.Remaining = FMath::FRandRange(Data.MinTime, FMath::Max(Data.MinTime, Data.MaxTime));
 	return EStateTreeRunStatus::Running;
 }
@@ -290,30 +282,26 @@ EStateTreeRunStatus FStateTreeTask_BirdIdle::EnterState(FStateTreeExecutionConte
 EStateTreeRunStatus FStateTreeTask_BirdIdle::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
-	// Cuenta regresiva; en 0 termina.
+	// Cuenta regresiva; en 0 termina
 	Data.Remaining -= DeltaTime;
 	return Data.Remaining <= 0.f ? EStateTreeRunStatus::Succeeded : EStateTreeRunStatus::Running;
 }
 
-// ---------------------------------------------------------------------
-// Condition
-// ---------------------------------------------------------------------
+// condition
 bool FStateTreeCondition_BirdActivity::TestCondition(FStateTreeExecutionContext& Context) const
 {
 	const FInstanceDataType& Data = Context.GetInstanceData(*this);
-	// Se cumple si Markov eligio esta actividad.
+	// Se cumple si Markov eligio esta actividad
 	return Data.Activity == Data.Expected;
 }
 
-// ---------------------------------------------------------------------
 // Evaluator
-// ---------------------------------------------------------------------
 void FStateTreeEvaluator_BirdSenses::TreeStart(FStateTreeExecutionContext& Context) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
-	// Castea el controller una sola vez.
+	// Castea el controller una sola vez
 	Data.CachedController = Cast<ABirdAIController>(Data.AIController);
-	// Desfase aleatorio: cada ave revisa en un frame distinto (intervalos escalonados).
+	// Desfase aleatorio, cada ave revisa en un frame distinto (intervalos escalonados)
 	Data.TimeToNextCheck = FMath::FRandRange(0.f, Data.CheckInterval);
 }
 
@@ -326,7 +314,7 @@ void FStateTreeEvaluator_BirdSenses::Tick(FStateTreeExecutionContext& Context, c
 		return;
 	}
 
-	// Solo revisa cada CheckInterval segundos, no cada frame.
+	// Solo revisa cada CheckInterval segundos, no cada frame
 	Data.TimeToNextCheck -= DeltaTime;
 	if (Data.TimeToNextCheck > 0.f)
 	{
@@ -334,17 +322,15 @@ void FStateTreeEvaluator_BirdSenses::Tick(FStateTreeExecutionContext& Context, c
 	}
 	Data.TimeToNextCheck = Data.CheckInterval;
 
-	// Copia lo que percibe el controller.
+	// copia lo que percibe el controller
 	Data.bPlayerVisible = Controller->IsPlayerVisible();
 	Data.bNervous = Controller->IsNervous();
 	Data.ThreatLocation = Controller->GetThreatLocation();
-	// Si el jugador esta muy cerca, el ave se asusta.
+	// Si el jugador esta muy cerca, el ave se asusta
 	Controller->CheckPlayerProximity();
 }
 
-// ---------------------------------------------------------------------
 // Attack Player
-// ---------------------------------------------------------------------
 EStateTreeRunStatus FStateTreeTask_BirdAttackPlayer::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -357,11 +343,11 @@ EStateTreeRunStatus FStateTreeTask_BirdAttackPlayer::EnterState(FStateTreeExecut
 
 	Data.Target = Player;
 	Data.Elapsed = 0.f;
-	// Se lanza hacia el jugador.
+	// Se lanza hacia el jugador
 	Bird->FlyTo(Player->GetActorLocation(), Data.Speed, 120.f);
 	if (AEagleAIController* Eagle = Cast<AEagleAIController>(Bird->GetController()))
 	{
-		// Mientras ataca, el aguila no se puede atrapar.
+		// mientras ataca, el aguila no se puede atrapar
 		Eagle->SetAttacking(true);
 	}
 	UE_LOG(LogTemp, Display, TEXT("%s ataca al jugador"), *Bird->GetName());
@@ -382,17 +368,17 @@ EStateTreeRunStatus FStateTreeTask_BirdAttackPlayer::Tick(FStateTreeExecutionCon
 	const FVector TargetLocation = Target->GetActorLocation() + FVector(0.f, 0.f, 40.f);
 	if (FVector::Dist(Bird->GetActorLocation(), TargetLocation) < 150.f)
 	{
-		// Lo alcanzo: le hace dano.
+		// Lo alcanzo, le hace dano
 		UGameplayStatics::ApplyDamage(Target, Data.Damage, Bird->GetController(), Bird, nullptr);
 		return EStateTreeRunStatus::Succeeded;
 	}
-	// Si tarda mucho, se rinde.
+	// si tarda mucho, se rinde
 	if (Data.Elapsed > Data.MaxTime)
 	{
 		return EStateTreeRunStatus::Failed;
 	}
 
-	// Sigue al jugador: si termino el vuelo sin alcanzarlo, vuelve a lanzarse.
+	// Sigue al jugador, si termino el vuelo sin alcanzarlo, vuelve a lanzarse
 	if (Bird->IsFlying())
 	{
 		Bird->UpdateFlightTarget(TargetLocation);
@@ -416,18 +402,14 @@ void FStateTreeTask_BirdAttackPlayer::ExitState(FStateTreeExecutionContext& Cont
 	}
 }
 
-// ---------------------------------------------------------------------
-// Random Chance
-// ---------------------------------------------------------------------
+// random Chance
 bool FStateTreeCondition_RandomChance::TestCondition(FStateTreeExecutionContext& Context) const
 {
-	// Numero al azar entre 0 y 1 contra la probabilidad.
+	// Numero al azar entre 0 y 1 contra la probabilidad
 	return FMath::FRand() < Context.GetInstanceData(*this).Probability;
 }
 
-// ---------------------------------------------------------------------
 // State Label
-// ---------------------------------------------------------------------
 void FStateTreeEvaluator_StateLabel::Tick(FStateTreeExecutionContext& Context, const float DeltaTime) const
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
@@ -436,10 +418,10 @@ void FStateTreeEvaluator_StateLabel::Tick(FStateTreeExecutionContext& Context, c
 	{
 		return;
 	}
-	// Actualiza el texto 5 veces por segundo.
+	// Actualiza el texto 5 veces por segundo
 	Data.TimeToNextUpdate = 0.2f;
 
-	// Nombre del estado activo mas profundo.
+	// Nombre del estado activo mas profundo
 	const TArray<FName> ActiveStates = Context.GetActiveStateNames();
 	const FName Leaf = ActiveStates.Num() > 0 ? ActiveStates.Last() : NAME_None;
 	if (Leaf == Data.ActiveState)
@@ -448,7 +430,7 @@ void FStateTreeEvaluator_StateLabel::Tick(FStateTreeExecutionContext& Context, c
 	}
 	Data.ActiveState = Leaf;
 
-	// Avisa a la criatura; su Blueprint decide como mostrarlo (OnStateChanged).
+	// avisa a la criatura; su Blueprint decide como mostrarlo (OnStateChanged)
 	if (ABirdBase* Bird = Cast<ABirdBase>(Data.Pawn))
 	{
 		Bird->SetCurrentState(Leaf);
@@ -459,12 +441,10 @@ void FStateTreeEvaluator_StateLabel::Tick(FStateTreeExecutionContext& Context, c
 	}
 }
 
-// ---------------------------------------------------------------------
 // Creature Stunned
-// ---------------------------------------------------------------------
 namespace
 {
-	// Activa o quita el stun en un ave o un raton.
+	// activa o quita el stun en un ave o un raton
 	void SetCreatureStunned(APawn* Pawn, bool bStunned)
 	{
 		if (ABirdBase* Bird = Cast<ABirdBase>(Pawn))
@@ -489,7 +469,7 @@ EStateTreeRunStatus FStateTreeTask_CreatureStunned::EnterState(FStateTreeExecuti
 {
 	FInstanceDataType& Data = Context.GetInstanceData(*this);
 	Data.Remaining = Data.Duration;
-	// Al entrar: queda aturdido.
+	// Al entrar, queda aturdido
 	SetCreatureStunned(Data.Pawn, true);
 	UE_LOG(LogTemp, Display, TEXT("%s quedo aturdido"), *GetNameSafe(Data.Pawn));
 	return EStateTreeRunStatus::Running;
@@ -504,14 +484,12 @@ EStateTreeRunStatus FStateTreeTask_CreatureStunned::Tick(FStateTreeExecutionCont
 
 void FStateTreeTask_CreatureStunned::ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
 {
-	// Al salir: se recupera.
+	// al salir, se recupera
 	SetCreatureStunned(Context.GetInstanceData(*this).Pawn, false);
 }
 
-// ---------------------------------------------------------------------
 // Precondiciones GOAP
-// ---------------------------------------------------------------------
-// Precondicion de Cazar: existe un raton vivo.
+// Precondicion de Cazar, existe un raton vivo
 bool FStateTreeCondition_PreyAvailable::TestCondition(FStateTreeExecutionContext& Context) const
 {
 	const APawn* Pawn = Context.GetInstanceData(*this).Pawn;
@@ -529,7 +507,7 @@ bool FStateTreeCondition_PreyAvailable::TestCondition(FStateTreeExecutionContext
 	return false;
 }
 
-// Precondicion de Atacar: la amenaza esta dentro del rango.
+// Precondicion de Atacar, la amenaza esta dentro del rango
 bool FStateTreeCondition_ThreatInRange::TestCondition(FStateTreeExecutionContext& Context) const
 {
 	const FInstanceDataType& Data = Context.GetInstanceData(*this);
