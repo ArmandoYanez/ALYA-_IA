@@ -3,7 +3,7 @@
 Se ejecuta dentro del editor:  python Tools/ue_exec.py Tools/build_forest.py
 Es re-ejecutable: borra y vuelve a crear el nivel.
 
-Puntos de interes (TargetPoints con tags) que usara la IA:
+Puntos de interes que usara la IA (BirdPerch / BirdFeedSpot / TargetPoints con tags):
   Perch          rama donde un ave puede posarse
   OwlPerch       percha alta/oculta preferida por el buho (tambien tiene Perch)
   FeedSpot       zona del suelo donde las aves bajan a comer
@@ -81,8 +81,8 @@ def spawn_mesh(label, mesh, mat, loc, scale, rot=(0, 0, 0), folder="", tags=()):
     return a
 
 
-def spawn_point(label, loc, tags, folder):
-    p = actors.spawn_actor_from_class(unreal.TargetPoint, unreal.Vector(*loc))
+def spawn_point(label, loc, tags, folder, cls=unreal.TargetPoint):
+    p = actors.spawn_actor_from_class(cls, unreal.Vector(*loc))
     p.set_actor_label(label)
     p.tags = [unreal.Name(t) for t in tags]
     p.set_folder_path(folder)
@@ -153,7 +153,8 @@ for t, (x, y) in enumerate(tree_positions, start=1):
         if z > height * 0.75 and t % 3 == 0:
             tags.append("OwlPerch")
         perch_count += 1
-        spawn_point(f"Perch_{t:02d}_{b + 1}", tip, tags, f"{folder}/Perches")
+        perch = spawn_point(f"Perch_{t:02d}_{b + 1}", tip, tags, f"{folder}/Perches", cls=unreal.BirdPerch)
+        perch.set_editor_property("owl_perch", "OwlPerch" in tags)
 
 # ---------- Arbustos (cobertura para acercarse sigilosamente) ----------
 for i in range(18):
@@ -182,7 +183,7 @@ for i in range(8):
     fx, fy = tx + math.cos(ang) * 350, ty + math.sin(ang) * 350
     spawn_mesh(f"FeedSpot_{i + 1:02d}_Seeds", CYLINDER, MAT["Seeds"], (fx, fy, 1),
                (1.6, 1.6, 0.02), folder="AI/FeedSpots")
-    spawn_point(f"FeedSpot_{i + 1:02d}", (fx, fy, 20), ["FeedSpot"], "AI/FeedSpots")
+    spawn_point(f"FeedSpot_{i + 1:02d}", (fx, fy, 0), ["FeedSpot"], "AI/FeedSpots", cls=unreal.BirdFeedSpot)
     feed_count += 1
 
 # ---------- Rutas de ratones (pares A-B) ----------
@@ -194,21 +195,40 @@ for i in range(4):
     for tag_pt, (px, py) in (("A", a), ("B", b)):
         spawn_mesh(f"MouseHole_{i + 1}{tag_pt}", CYLINDER, MAT["Path"], (px, py, 1),
                    (0.7, 0.7, 0.02), folder="AI/MousePaths")
-        spawn_point(f"MousePath_{i + 1}{tag_pt}", (px, py, 20), ["MousePath", f"MouseRoute{i + 1}"],
-                    "AI/MousePaths")
+        point = spawn_point(f"MousePath_{i + 1}{tag_pt}", (px, py, 20), ["MousePath", f"MouseRoute{i + 1}"],
+                            "AI/MousePaths", cls=unreal.MousePathPoint)
+        point.set_editor_property("route_id", i + 1)
         mouse_count += 1
 
 # ---------- Ruta de vuelo del aguila ----------
 for i in range(8):
     ang = (i / 8.0) * 2 * math.pi
     spawn_point(f"EagleWaypoint_{i + 1}", (math.cos(ang) * 2500, math.sin(ang) * 2500, 2200),
-                ["EagleWaypoint"], "AI/EagleRoute")
+                ["EagleWaypoint"], "AI/EagleRoute", cls=unreal.EagleWaypoint)
+
+# ---------- Criaturas (spawners) ----------
+for label, pawn_class, spawn_point_type, count, respawn in (
+        ("Spawner_CommonBird", unreal.CommonBird, unreal.CreatureSpawnPoint.PERCH, 16, 25.0),
+        ("Spawner_Owl", unreal.OwlBird, unreal.CreatureSpawnPoint.OWL_PERCH, 3, 40.0),
+        ("Spawner_Eagle", unreal.EagleBird, unreal.CreatureSpawnPoint.SKY, 1, 45.0),
+        ("Spawner_Mouse", unreal.MouseCritter, unreal.CreatureSpawnPoint.MOUSE_ROUTE, 4, 15.0)):
+    spawner = actors.spawn_actor_from_class(unreal.BirdSpawner, unreal.Vector(0, 0, 300))
+    spawner.set_actor_label(label)
+    spawner.set_folder_path("AI/Spawners")
+    spawner.set_editor_property("pawn_class", pawn_class)
+    spawner.set_editor_property("spawn_point", spawn_point_type)
+    spawner.set_editor_property("count", count)
+    spawner.set_editor_property("respawn_delay", respawn)
 
 # ---------- Navegacion y jugador ----------
 nav = actors.spawn_actor_from_class(unreal.NavMeshBoundsVolume, unreal.Vector(0, 0, 0))
 nav.set_actor_label("NavMeshBounds")
 nav.set_actor_scale3d(unreal.Vector(45, 45, 6))
 nav.set_folder_path("AI")
+
+# NavMesh dinamico: se genera al iniciar el juego (no depende de guardarlo construido).
+for recast in [a for a in actors.get_all_level_actors() if isinstance(a, unreal.RecastNavMesh)]:
+    recast.set_editor_property("runtime_generation", unreal.RuntimeGenerationType.DYNAMIC)
 
 start = actors.spawn_actor_from_class(unreal.PlayerStart, unreal.Vector(0, 0, 120))
 start.set_actor_label("PlayerStart")

@@ -29,6 +29,17 @@ public class ALYA_AI : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
+		// Constructor de assets de IA (WingShotAssetBuilder): solo en el editor.
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {
+				"UnrealEd",
+				"AssetRegistry",
+				"StateTreeEditorModule",
+				"PropertyBindingUtils",
+			});
+		}
+
 		PublicIncludePaths.AddRange(new string[] {
 			"ALYA_AI",
 			"ALYA_AI/Variant_Horror",

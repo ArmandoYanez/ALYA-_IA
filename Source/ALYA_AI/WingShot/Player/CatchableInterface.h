@@ -1,3 +1,5 @@
+// Interfaz para todo lo que se puede atrapar con la red.
+
 #pragma once
 
 #include "CoreMinimal.h"

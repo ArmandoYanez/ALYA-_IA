@@ -5,7 +5,7 @@
 - Crea IA_Sneak, IA_Binoculars e IA_FireNet y los mapea en IMC_Default
   (Ctrl izquierdo, clic derecho y clic izquierdo).
 - Cambia el padre de BP_FirstPersonCharacter a AWingShotCharacter.
-- Cambia el padre de BP_FirstPersonGameMode a AWingShotGameMode (HUD de WingShot).
+- Cambia el padre de BP_FirstPersonGameMode a AWingShotGameMode (GameMode de WingShot).
 """
 import unreal
 
@@ -38,7 +38,9 @@ imc = unreal.load_asset("/Game/Input/IMC_Default")
 for action, key_name in ((sneak, "LeftControl"), (binoculars, "RightMouseButton"), (fire_net, "LeftMouseButton")):
     imc.unmap_all_keys_from_action(action)
     imc.map_key(action, make_key(key_name))
-eal.save_loaded_asset(imc)
+# map_key no marca el asset como modificado: hay que forzarlo o el guardado se salta.
+imc.modify()
+eal.save_loaded_asset(imc, False)
 
 # Personaje: nuevo padre C++ con sigilo, binoculares y red.
 # (Las acciones de input se asignan en el constructor de AWingShotCharacter.)
@@ -47,7 +49,7 @@ unreal.BlueprintEditorLibrary.reparent_blueprint(bp, unreal.WingShotCharacter)
 unreal.BlueprintEditorLibrary.compile_blueprint(bp)
 eal.save_loaded_asset(bp, False)
 
-# GameMode: nuevo padre C++ que define el HUD de WingShot.
+# GameMode: nuevo padre C++ de WingShot.
 gm_bp = unreal.load_asset("/Game/FirstPerson/Blueprints/BP_FirstPersonGameMode")
 unreal.BlueprintEditorLibrary.reparent_blueprint(gm_bp, unreal.WingShotGameMode)
 unreal.BlueprintEditorLibrary.compile_blueprint(gm_bp)

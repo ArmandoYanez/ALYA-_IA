@@ -1,10 +1,11 @@
+// Personaje del jugador en primera persona.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ALYA_AICharacter.h"
 #include "WingShotCharacter.generated.h"
 
-class ANetProjectile;
 class UInputAction;
 
 // Jugador de WingShot: sigilo, binoculares, pistola de red y coleccion de aves.
@@ -34,6 +35,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "WingShot|Collection")
 	int32 GetTotalCaught() const { return TotalCaught; }
+
+	UFUNCTION(BlueprintPure, Category = "WingShot|Health")
+	float GetHealthPercent() const { return MaxHealth > 0.f ? Health / MaxHealth : 0.f; }
+
+	// Los ataques de buho y aguila llegan como dano (ApplyDamage).
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	const TMap<FName, int32>& GetCaughtBySpecies() const { return CaughtBySpecies; }
 
@@ -90,11 +97,19 @@ protected:
 	float BinocularsLookScale = 0.25f;
 
 	// --- Pistola de red ---
-	UPROPERTY(EditAnywhere, Category = "WingShot|Net")
-	TSubclassOf<ANetProjectile> NetClass;
+	// Blueprint de la red que se dispara (BP_Net). Se asigna en BP_FirstPersonCharacter.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WingShot|Net")
+	TSubclassOf<AActor> NetClass;
 
 	UPROPERTY(EditAnywhere, Category = "WingShot|Net")
 	float NetCooldown = 0.8f;
+
+	// --- Salud ---
+	UPROPERTY(EditAnywhere, Category = "WingShot|Health")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "WingShot|Health")
+	float Health = 100.f;
 
 	// --- Estado ---
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "WingShot|State")

@@ -1,4 +1,4 @@
-#include "WingShot/WingShotCharacter.h"
+#include "WingShot/Player/WingShotCharacter.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -8,12 +8,13 @@
 #include "InputAction.h"
 #include "Perception/AISense_Hearing.h"
 #include "UObject/ConstructorHelpers.h"
-#include "WingShot/NetProjectile.h"
+#include "Engine/DamageEvents.h"
+#include "GameFramework/PlayerStart.h"
+#include "Kismet/GameplayStatics.h"
 
 AWingShotCharacter::AWingShotCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	NetClass = ANetProjectile::StaticClass();
 
 	// Acciones de input por defecto (creadas por Tools/setup_player.py).
 	static ConstructorHelpers::FObjectFinder<UInputAction> SneakFinder(TEXT("/Game/WingShot/Input/IA_Sneak.IA_Sneak"));
@@ -29,9 +30,11 @@ void AWingShotCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	Health = MaxHealth;
 	DefaultFOV = GetFirstPersonCameraComponent()->FieldOfView;
 }
 
+// Conecta las teclas: Ctrl = sigilo, clic derecho = binoculares, clic izquierdo = red.
 void AWingShotCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -74,6 +77,7 @@ void AWingShotCharacter::DoAim(float Yaw, float Pitch)
 	Super::DoAim(Yaw * Scale, Pitch * Scale);
 }
 
+// Sigilo: camina lento y hace menos ruido.
 void AWingShotCharacter::StartSneak()
 {
 	bIsSneaking = true;
@@ -86,6 +90,7 @@ void AWingShotCharacter::StopSneak()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
+// Binoculares: oculta los brazos; el zoom se hace en Tick.
 void AWingShotCharacter::StartBinoculars()
 {
 	bUsingBinoculars = true;
@@ -117,6 +122,7 @@ void AWingShotCharacter::UpdateFootstepNoise(float DeltaSeconds)
 	// Los pasos sigilosos se oyen mucho mas cerca: asi el jugador puede acercarse a las aves.
 	const float Range = bIsSneaking ? SneakNoiseRange : WalkNoiseRange;
 	const float Loudness = bIsSneaking ? 0.2f : 1.0f;
+	// Ruido que las criaturas oyen con AI Perception.
 	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), Loudness, this, Range, TEXT("Footstep"));
 }
 
@@ -137,20 +143,46 @@ void AWingShotCharacter::FireNet()
 	Params.Owner = this;
 	Params.Instigator = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	GetWorld()->SpawnActor<ANetProjectile>(NetClass, SpawnLocation, AimRotation, Params);
+	// Dispara la red desde la camara.
+	GetWorld()->SpawnActor<AActor>(NetClass, SpawnLocation, AimRotation, Params);
 
 	// Disparar hace ruido: las aves cercanas lo escuchan.
 	UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetActorLocation(), 1.0f, this, 2000.0f, TEXT("NetShot"));
 }
 
+// Suma una captura (el numero del HUD).
 void AWingShotCharacter::RegisterCatch(FName Species)
 {
 	CaughtBySpecies.FindOrAdd(Species)++;
 	TotalCaught++;
 
-	if (GEngine)
+	UE_LOG(LogTemp, Display, TEXT("Atrapaste: %s (total: %d)"), *Species.ToString(), TotalCaught);
+}
+
+float AWingShotCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float Applied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	// Baja la vida (ataques de buho y aguila).
+	Health = FMath::Max(0.f, Health - DamageAmount);
+
+	// Empujon en direccion contraria al atacante.
+	if (DamageCauser)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
-			FString::Printf(TEXT("Atrapaste: %s  (total: %d)"), *Species.ToString(), TotalCaught));
+		const FVector Push = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal2D() * 600.f + FVector(0.f, 0.f, 250.f);
+		LaunchCharacter(Push, true, true);
 	}
+
+	UE_LOG(LogTemp, Display, TEXT("%s ataco al jugador (-%.0f)"), *GetNameSafe(DamageCauser), DamageAmount);
+
+	// Noqueado: reaparece en el inicio con la salud completa.
+	if (Health <= 0.f)
+	{
+		if (const AActor* Start = UGameplayStatics::GetActorOfClass(this, APlayerStart::StaticClass()))
+		{
+			SetActorLocation(Start->GetActorLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+		}
+		Health = MaxHealth;
+		UE_LOG(LogTemp, Display, TEXT("Jugador noqueado: reaparece en el claro."));
+	}
+	return Applied;
 }
